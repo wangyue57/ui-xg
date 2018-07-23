@@ -80,6 +80,8 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader'])
                     const fixTableContainer = this.el.querySelector('.uix-table-pre-frozen .uix-table-body-container');
                     this.syncFixTable(tableContainer, fixTableContainer);
                 });
+            } else {
+                $scope.preFixCols = null;
             }
 
             if (postFixCols.length) {
@@ -95,6 +97,8 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader'])
                     const fixTableContainer = this.el.querySelector('.uix-table-post-frozen .uix-table-body-container');
                     this.syncFixTable(tableContainer, fixTableContainer);
                 });
+            } else {
+                $scope.postFixCols = null;
             }
         };
 
@@ -102,14 +106,16 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader'])
             let tableTimeStamp = null;
             let fixTableTimeStamp = null;
 
-            angular.element(tableContainer).on('scroll', function (event) {
-                if (event.timeStamp - fixTableTimeStamp < 100) {
-                    return;
-                }
+            angular.element(tableContainer)
+                .on('scroll', function (event) {
+                    if (event.timeStamp - fixTableTimeStamp < 100) {
+                        return;
+                    }
 
-                tableTimeStamp = event.timeStamp;
-                fixTableContainer.scrollTop = tableContainer.scrollTop;
-            });
+                    tableTimeStamp = event.timeStamp;
+                    fixTableContainer.scrollTop = tableContainer.scrollTop;
+                })
+                .triggerHandler('scroll');
 
             angular.element(fixTableContainer).on('scroll', function (event) {
                 if (event.timeStamp - tableTimeStamp < 100) {
@@ -119,6 +125,7 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader'])
                 fixTableTimeStamp = event.timeStamp;
                 tableContainer.scrollTop = fixTableContainer.scrollTop;
             });
+
 
             const trs = tableContainer.querySelectorAll('tbody tr');
             const fixTrs = fixTableContainer.querySelectorAll('tbody tr');
