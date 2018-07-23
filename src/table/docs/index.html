@@ -1,0 +1,25 @@
+<div ng-controller="tableDemoCtrl">
+    <button ng-click="refresh()">刷新数据</button>
+    <label>
+        <input type="checkbox" ng-model="useSelect">
+        表格可选
+    </label>
+    <label>
+        <input type="checkbox" ng-model="single">
+        单选
+    </label>
+    <label>
+        <input type="checkbox" ng-model="fixHead">
+        固定表头
+    </label>
+
+    <uix-table
+            data="data"
+            columns="columns"
+            operations="operations"
+            use-select="useSelect"
+            single="single"
+            table-loader="tableLoader"
+            fix-head="fixHead">
+    </uix-table>
+</div>

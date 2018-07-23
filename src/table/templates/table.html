@@ -1,0 +1,158 @@
+<div class="uix-table-box">
+    <div class="uix-table-container" ng-style="{width:width?width+'px':'auto'}">
+        <div class="uix-table-header-container" ng-show="fixHead" ng-style="{width:tableWidth+'px'}">
+            <table class="uix-table">
+                <colgroup>
+                    <col ng-show="useSelect" ng-style="{width: '50px'}">
+                    <col ng-repeat="col in columns track by col.key"
+                         ng-style="{width: (col.width||150)+'px'}">
+                    <col ng-show="operations" ng-style="{width: '150px'}">
+                </colgroup>
+                <thead>
+                <tr>
+                    <th ng-show="useSelect" class="text-center">
+                        <label ng-show="!single" class="i-checks">
+                            <input type="checkbox" ng-model="__allRowSelected"
+                                   ng-click="selectAllRow($event)">
+                            <i></i>
+                        </label>
+                    </th>
+                    <th ng-repeat="col in columns track by col.key">
+                        {{col.title}}
+                    </th>
+                    <th ng-show="operations">操作</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+
+        <div class="uix-table-body-container"
+             ng-style="{width:tableWidth+'px',height:(fixHead?tableHeight:tableHeight+36)+'px'}">
+            <div class="uix-table-body">
+                <table class="uix-table" uix-table-loader="tableLoader" loader-height="500">
+                    <colgroup>
+                        <col ng-show="useSelect" ng-style="{width: '50px'}">
+                        <col ng-repeat="col in columns track by col.key"
+                             ng-style="{width: (col.width||150)+'px'}">
+                        <col ng-show="operations" ng-style="{width: '150px'}">
+                    </colgroup>
+                    <thead ng-show="!fixHead">
+                    <tr>
+                        <th ng-show="useSelect" class="text-center">
+                            <label ng-show="!single" class="i-checks">
+                                <input type="checkbox" ng-model="__allRowSelected"
+                                       ng-click="selectAllRow($event)">
+                                <i></i>
+                            </label>
+                        </th>
+                        <th ng-repeat="col in columns track by col.key">
+                            {{col.title}}
+                        </th>
+                        <th ng-show="operations">操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="row in data track by row.id">
+                        <td ng-show="useSelect" class="text-center">
+                            <label class="i-checks" ng-show="!single">
+                                <input type="checkbox"
+                                       ng-model="row.__selected"
+                                       ng-disabled="isRowDisabled(row)"
+                                       ng-click="selectRow($event, row)">
+                                <i></i>
+                            </label>
+                            <label class="i-checks" ng-show="single">
+                                <input type="radio"
+                                       name="selectRow"
+                                       ng-value="row.id"
+                                       ng-model="row.__selected"
+                                       ng-disabled="isRowDisabled(row)">
+                                <i></i>
+                            </label>
+                        </td>
+                        <td ng-repeat="col in columns track by col.key">
+                            {{col.filter ? col.filter(row[col.key], row) : row[col.key]}}
+                        </td>
+                        <td ng-show="operations">
+                            <button ng-repeat="opt in operations"
+                                    title="{{opt.title}}"
+                                    ng-show="opt.showOpt(row)"
+                                    ng-click="opt.clickHandler(row)"
+                                    class="btn btn-sm btn-default m-l-sm">
+                                <i class="{{opt.icon}}"></i>
+                                {{opt.title}}
+                            </button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="uix-table-container uix-table-pre-frozen" ng-if="preFixCols" ng-style="{width: preFixWidth+'px'}">
+        <div class="uix-table-header-container" ng-show="fixHead">
+            <table class="uix-table">
+                <thead>
+                <tr>
+                    <th ng-show="useSelect" class="text-center" ng-style="{width: 50*widthRadio+'px'}">
+                        <label ng-show="!single" class="i-checks">
+                            <input type="checkbox" ng-model="__allRowSelected"
+                                   ng-click="selectAllRow($event)">
+                            <i></i>
+                        </label>
+                    </th>
+                    <th ng-repeat="col in preFixCols track by col.key" ng-style="{width: col.fixWidth+'px'}">
+                        {{col.title}}
+                    </th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+
+        <div class="uix-table-body-container" ng-style="{height:(fixHead?tableHeight:tableHeight+36)+'px'}">
+            <div class="uix-table-body">
+                <table class="uix-table" uix-table-loader="tableLoader" loader-height="500">
+                    <thead ng-show="!fixHead">
+                    <tr>
+                        <th ng-show="useSelect" class="text-center" ng-style="{width: 50*widthRadio+'px'}">
+                            <label ng-show="!single" class="i-checks">
+                                <input type="checkbox" ng-model="__allRowSelected"
+                                       ng-click="selectAllRow($event)">
+                                <i></i>
+                            </label>
+                        </th>
+                        <th ng-repeat="col in preFixCols track by col.key" ng-style="{width: col.fixWidth+'px'}">
+                            {{col.title}}
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="row in data track by row.id">
+                        <td ng-show="useSelect" class="text-center" ng-style="{width: 50*widthRadio+'px'}">
+                            <label class="i-checks" ng-show="!single">
+                                <input type="checkbox"
+                                       ng-model="row.__selected"
+                                       ng-disabled="isRowDisabled(row)"
+                                       ng-click="selectRow($event, row)">
+                                <i></i>
+                            </label>
+                            <label class="i-checks" ng-show="single">
+                                <input type="radio"
+                                       name="selectRow"
+                                       ng-value="row.id"
+                                       ng-model="row.__selected"
+                                       ng-disabled="isRowDisabled(row)">
+                                <i></i>
+                            </label>
+                        </td>
+                        <td ng-repeat="col in preFixCols track by col.key" ng-style="{width: col.fixWidth+'px'}">
+                            {{col.filter ? col.filter(row[col.key], row) : row[col.key]}}
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
