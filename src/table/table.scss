@@ -96,6 +96,16 @@
   }
 }
 
+.uix-table-post-frozen {
+  position: absolute;
+  right: 0;
+  top: 0;
+
+  .uix-table-body-container::-webkit-scrollbar {
+    display: none
+  }
+}
+
 .uix-table-container {
   overflow-x: scroll;
 }

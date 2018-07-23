@@ -2,25 +2,19 @@
     <div class="uix-table-container" ng-style="{width:width?width+'px':'auto'}">
         <div class="uix-table-header-container" ng-show="fixHead" ng-style="{width:tableWidth+'px'}">
             <table class="uix-table">
-                <colgroup>
-                    <col ng-show="useSelect" ng-style="{width: '50px'}">
-                    <col ng-repeat="col in columns track by col.key"
-                         ng-style="{width: (col.width||150)+'px'}">
-                    <col ng-show="operations" ng-style="{width: '150px'}">
-                </colgroup>
                 <thead>
                 <tr>
-                    <th ng-show="useSelect" class="text-center">
+                    <th ng-show="useSelect" class="text-center" ng-style="{width: 50*widthRadio+'px'}">
                         <label ng-show="!single" class="i-checks">
                             <input type="checkbox" ng-model="__allRowSelected"
                                    ng-click="selectAllRow($event)">
                             <i></i>
                         </label>
                     </th>
-                    <th ng-repeat="col in columns track by col.key">
+                    <th ng-repeat="col in columns track by col.key" ng-style="{width: col.width+'px'}">
                         {{col.title}}
                     </th>
-                    <th ng-show="operations">操作</th>
+                    <th ng-show="operations" ng-style="{width: 150*widthRadio+'px'}">操作</th>
                 </tr>
                 </thead>
             </table>
@@ -29,31 +23,25 @@
         <div class="uix-table-body-container"
              ng-style="{width:tableWidth+'px',height:(fixHead?tableHeight:tableHeight+36)+'px'}">
             <div class="uix-table-body">
-                <table class="uix-table" uix-table-loader="tableLoader" loader-height="500">
-                    <colgroup>
-                        <col ng-show="useSelect" ng-style="{width: '50px'}">
-                        <col ng-repeat="col in columns track by col.key"
-                             ng-style="{width: (col.width||150)+'px'}">
-                        <col ng-show="operations" ng-style="{width: '150px'}">
-                    </colgroup>
+                <table class="uix-table" uix-table-loader="tableLoader" loader-height="450">
                     <thead ng-show="!fixHead">
                     <tr>
-                        <th ng-show="useSelect" class="text-center">
+                        <th ng-show="useSelect" class="text-center" ng-style="{width: 50*widthRadio+'px'}">
                             <label ng-show="!single" class="i-checks">
                                 <input type="checkbox" ng-model="__allRowSelected"
                                        ng-click="selectAllRow($event)">
                                 <i></i>
                             </label>
                         </th>
-                        <th ng-repeat="col in columns track by col.key">
+                        <th ng-repeat="col in columns track by col.key" ng-style="{width: col.width+'px'}">
                             {{col.title}}
                         </th>
-                        <th ng-show="operations">操作</th>
+                        <th ng-show="operations" ng-style="{width: 150*widthRadio+'px'}">操作</th>
                     </tr>
                     </thead>
                     <tbody>
                     <tr ng-repeat="row in data track by row.id">
-                        <td ng-show="useSelect" class="text-center">
+                        <td ng-show="useSelect" class="text-center" ng-style="{width: 50*widthRadio+'px'}">
                             <label class="i-checks" ng-show="!single">
                                 <input type="checkbox"
                                        ng-model="row.__selected"
@@ -70,10 +58,10 @@
                                 <i></i>
                             </label>
                         </td>
-                        <td ng-repeat="col in columns track by col.key">
+                        <td ng-repeat="col in columns track by col.key" ng-style="{width: col.width+'px'}">
                             {{col.filter ? col.filter(row[col.key], row) : row[col.key]}}
                         </td>
-                        <td ng-show="operations">
+                        <td ng-show="operations" ng-style="{width: 150*widthRadio+'px'}">
                             <button ng-repeat="opt in operations"
                                     title="{{opt.title}}"
                                     ng-show="opt.showOpt(row)"
@@ -102,7 +90,7 @@
                             <i></i>
                         </label>
                     </th>
-                    <th ng-repeat="col in preFixCols track by col.key" ng-style="{width: col.fixWidth+'px'}">
+                    <th ng-repeat="col in preFixCols track by col.key" ng-style="{width: col.width+'px'}">
                         {{col.title}}
                     </th>
                 </tr>
@@ -112,7 +100,7 @@
 
         <div class="uix-table-body-container" ng-style="{height:(fixHead?tableHeight:tableHeight+36)+'px'}">
             <div class="uix-table-body">
-                <table class="uix-table" uix-table-loader="tableLoader" loader-height="500">
+                <table class="uix-table" uix-table-loader="tableLoader" loader-height="0">
                     <thead ng-show="!fixHead">
                     <tr>
                         <th ng-show="useSelect" class="text-center" ng-style="{width: 50*widthRadio+'px'}">
@@ -122,7 +110,7 @@
                                 <i></i>
                             </label>
                         </th>
-                        <th ng-repeat="col in preFixCols track by col.key" ng-style="{width: col.fixWidth+'px'}">
+                        <th ng-repeat="col in preFixCols track by col.key" ng-style="{width: col.width+'px'}">
                             {{col.title}}
                         </th>
                     </tr>
@@ -146,7 +134,7 @@
                                 <i></i>
                             </label>
                         </td>
-                        <td ng-repeat="col in preFixCols track by col.key" ng-style="{width: col.fixWidth+'px'}">
+                        <td ng-repeat="col in preFixCols track by col.key" ng-style="{width: col.width+'px'}">
                             {{col.filter ? col.filter(row[col.key], row) : row[col.key]}}
                         </td>
                     </tr>

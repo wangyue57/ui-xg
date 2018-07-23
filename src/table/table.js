@@ -17,26 +17,27 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader'])
         };
 
         this.initWatch = function () {
-            $scope.$watch('data', () => {
+            $scope.$watch('data', function () {
                 $scope.__allRowSelected = $scope.data.every(row => row.__selected || $scope.isRowDisabled(row));
             });
         };
 
         this.setTableSize = function () {
-
-            const totalWidth = this.el.offsetWidth;
-            let tableWidth = $scope.columns.reduce((res, col) => res + (col.width || 150), 0);
+            const parentWidth = this.el.offsetWidth;
+            let totalWidth = $scope.columns.reduce((res, col) => res + (col.width || 150), 0);
             if ($scope.operations) {
-                tableWidth += 150;
+                totalWidth += 150;
             }
             if ($scope.useSelect) {
-                tableWidth += 50;
+                totalWidth += 50;
             }
 
             $scope.tableHeight = $scope.height || 450;
-            $scope.tableWidth = Math.max(totalWidth, tableWidth);
-            $scope.widthRadio = $scope.tableWidth / tableWidth;
-            console.log($scope.widthRadio);
+            $scope.tableWidth = Math.max(parentWidth, totalWidth);
+            $scope.widthRadio = $scope.tableWidth / totalWidth;
+            angular.forEach($scope.columns, col => {
+                col.width = (col.width || 150) * $scope.widthRadio;
+            });
         };
 
         this.initFixTable = function () {
@@ -47,10 +48,7 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader'])
 
             for (i = 0; i < colLen; i++) {
                 if ($scope.columns[i].fix) {
-                    const column = $scope.columns[i];
-                    column.fixWidth = (column.width || 150) * $scope.widthRadio;
-
-                    preFixCols.push(column);
+                    preFixCols.push($scope.columns[i]);
                 } else {
                     break;
                 }
@@ -58,10 +56,7 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader'])
 
             for (j = colLen - 1; j > i; j--) {
                 if ($scope.columns[j].fix) {
-                    const column = $scope.columns[i];
-                    column.fixWidth = (column.width || 150) * $scope.widthRadio;
-
-                    postFixCols.unshift(column);
+                    postFixCols.unshift($scope.columns[j]);
                 } else {
                     break;
                 }
@@ -69,7 +64,7 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader'])
 
 
             if (preFixCols.length) {
-                let preFixWidth = preFixCols.reduce((res, col) => res + col.fixWidth, 0);
+                let preFixWidth = preFixCols.reduce((res, col) => res + col.width, 0);
                 if ($scope.useSelect) {
                     preFixWidth += 50 * $scope.widthRadio;
                 }
@@ -80,36 +75,51 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader'])
                 $timeout(() => {
                     const tableContainer = this.el.querySelector('.uix-table-container .uix-table-body-container');
                     const fixTableContainer = this.el.querySelector('.uix-table-pre-frozen .uix-table-body-container');
-
-                    let timeer = null;
-                    angular.element(tableContainer).on('scroll', evt => {
-                        clearTimeout(timeer);
-                        fixTableContainer.scrollTop = tableContainer.scrollTop;
-                        timeer = setTimeout(() => fixTableContainer.scrollTop = tableContainer.scrollTop, 50);
-                    });
-
-                    angular.element(fixTableContainer).on('scroll', evt => {
-                        clearTimeout(timeer);
-                        tableContainer.scrollTop = fixTableContainer.scrollTop;
-                        timeer = setTimeout(() => tableContainer.scrollTop = fixTableContainer.scrollTop, 50);
-                    });
-
-                    const trs = tableContainer.querySelectorAll('tbody tr');
-                    const fixTrs = fixTableContainer.querySelectorAll('tbody tr');
-                    for (let i = 0; i < trs.length; i++) {
-                        console.log(fixTrs[i].height);
-                    }
+                    this.syncFixTable(tableContainer, fixTableContainer);
                 });
             }
 
             if (postFixCols.length) {
-                let postFixWidth = postFixCols.reduce((res, col) => res + col.fixWidth, 0);
+                let postFixWidth = postFixCols.reduce((res, col) => res + col.width, 0);
                 if ($scope.operations) {
                     postFixWidth += 150 * $scope.widthRadio;
                 }
 
                 $scope.postFixCols = postFixCols;
                 $scope.postFixWidth = postFixWidth;
+                $timeout(() => {
+                    const tableContainer = this.el.querySelector('.uix-table-container .uix-table-body-container');
+                    const fixTableContainer = this.el.querySelector('.uix-table-post-frozen .uix-table-body-container');
+                    this.syncFixTable(tableContainer, fixTableContainer);
+                });
+            }
+        };
+
+        this.syncFixTable = function (tableContainer, fixTableContainer) {
+            let tableTimeStamp = null;
+            let fixTableTimeStamp = null;
+
+            angular.element(tableContainer).on('scroll', function (event) {
+                if (event.timeStamp - fixTableTimeStamp < 100) {
+                    return;
+                }
+
+                tableTimeStamp = event.timeStamp;
+                fixTableContainer.scrollTop = tableContainer.scrollTop;
+            });
+
+            angular.element(fixTableContainer).on('scroll', function (event) {
+                if (event.timeStamp - tableTimeStamp < 100) {
+                    return;
+                }
+
+                fixTableTimeStamp = event.timeStamp;
+                tableContainer.scrollTop = fixTableContainer.scrollTop;
+            });
+
+            const trs = tableContainer.querySelectorAll('tbody tr');
+            const fixTrs = fixTableContainer.querySelectorAll('tbody tr');
+            for (let i = 0; i < trs.length; i++) {
             }
         };
 
