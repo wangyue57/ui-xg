@@ -12,6 +12,14 @@
         <input type="checkbox" ng-model="fixHead">
         固定表头
     </label>
+    <label>
+        <input type="checkbox" ng-click="fixPre($event)">
+        冻结前两列
+    </label>
+    <label>
+        <input type="checkbox" ng-click="fixPost($event)">
+        冻结后两列
+    </label>
 
     <uix-table
             data="data"

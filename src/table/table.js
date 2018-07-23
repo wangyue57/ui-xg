@@ -17,9 +17,13 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader'])
         };
 
         this.initWatch = function () {
-            $scope.$watch('data', function () {
+            $scope.$watch('data', () => {
                 $scope.__allRowSelected = $scope.data.every(row => row.__selected || $scope.isRowDisabled(row));
             });
+
+            $scope.$watch('columns', () => {
+                this.initFixTable();
+            }, true);
         };
 
         this.setTableSize = function () {
@@ -61,7 +65,6 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader'])
                     break;
                 }
             }
-
 
             if (preFixCols.length) {
                 let preFixWidth = preFixCols.reduce((res, col) => res + col.width, 0);

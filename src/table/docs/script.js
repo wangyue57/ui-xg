@@ -5,17 +5,10 @@ angular.module('uixDemo').controller('tableDemoCtrl', ['$scope', '$timeout', fun
     $scope.single = false;
     $scope.tableLoader = 0;
 
-    $scope.columns = [
-        {title: '姓名', key: 'name', fix: true},
-        {
-            title: '年龄',
-            key: 'age',
-            filter(val, row) {
-                return val * 10;
-            }
-        },
-        {title: '工位', key: 'address'}
-    ];
+    $scope.columns = [...Array(20).keys()].map((col, i) => ({
+        key: 'col' + i,
+        title: `第${i + 1}列`
+    }));
 
     $scope.operations = [
         {
@@ -27,32 +20,33 @@ angular.module('uixDemo').controller('tableDemoCtrl', ['$scope', '$timeout', fun
             clickHandler(row) {
                 // 操作按钮事件函数，参数为此行数据
                 console.log(row);
-                alert(`点击了第${row.id + 1}行！${row.__selected?'此行已选中！':''}`);
+                alert(`点击了第${row.id + 1}行！${row.__selected ? '此行已选中！' : ''}`);
             },
             icon: 'fa fa-delete',
             title: '操作'
         }
     ];
 
-    $scope.data = [...Array(100).keys()].map((row, i) => ({
-        id: i,
-        age: Math.floor(Math.random() * 10),
-        name: `编号${9527 + i}`,
-        address: `SMG-1-${i + 1}`,
-    }));
+    $scope.data = [...Array(100).keys()].map((row, i) => {
+        const val = {id: i};
+        angular.forEach($scope.columns, (col, j) => {
+            val[col.key] = `第${i + 1}行第${j + 1}列的内容`
+        });
+        return val;
+    });
 
     $scope.refresh = function () {
         $scope.tableLoader = 1;
-
-        $scope.data = [...Array(100).keys()].map((row, i) => ({
-            id: i,
-            age: Math.floor(Math.random() * 10),
-            name: `编号${9527 + i}`,
-            address: `SMG-1-${i + 1}`,
-        }));
-
-        $timeout(() => {
-            $scope.tableLoader = 0;
-        }, 2000)
+        $timeout(() => $scope.tableLoader = 0, 2000)
     }
+
+    $scope.fixPre = function ($event) {
+        $scope.columns[0].fix = $event.target.checked;
+        $scope.columns[1].fix = $event.target.checked;
+    };
+
+    $scope.fixPost = function ($event) {
+        $scope.columns[18].fix = $event.target.checked;
+        $scope.columns[19].fix = $event.target.checked;
+    };
 }]);

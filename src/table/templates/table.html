@@ -143,4 +143,51 @@
             </div>
         </div>
     </div>
+
+    <div class="uix-table-container uix-table-post-frozen" ng-if="postFixCols" ng-style="{width: postFixWidth+'px'}">
+        <div class="uix-table-header-container" ng-show="fixHead">
+            <table class="uix-table">
+                <thead>
+                <tr>
+                    <th ng-repeat="col in postFixCols track by col.key" ng-style="{width: col.width+'px'}">
+                        {{col.title}}
+                    </th>
+                    <th ng-show="operations" ng-style="{width: 150*widthRadio+'px'}">操作</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+
+        <div class="uix-table-body-container" ng-style="{height:(fixHead?tableHeight:tableHeight+36)+'px'}">
+            <div class="uix-table-body">
+                <table class="uix-table" uix-table-loader="tableLoader" loader-height="0">
+                    <thead ng-show="!fixHead">
+                    <tr>
+                        <th ng-repeat="col in postFixCols track by col.key" ng-style="{width: col.width+'px'}">
+                            {{col.title}}
+                        </th>
+                        <th ng-show="operations" ng-style="{width: 150*widthRadio+'px'}">操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="row in data track by row.id">
+                        <td ng-repeat="col in postFixCols track by col.key" ng-style="{width: col.width+'px'}">
+                            {{col.filter ? col.filter(row[col.key], row) : row[col.key]}}
+                        </td>
+                        <td ng-show="operations" ng-style="{width: 150*widthRadio+'px'}">
+                            <button ng-repeat="opt in operations"
+                                    title="{{opt.title}}"
+                                    ng-show="opt.showOpt(row)"
+                                    ng-click="opt.clickHandler(row)"
+                                    class="btn btn-sm btn-default m-l-sm">
+                                <i class="{{opt.icon}}"></i>
+                                {{opt.title}}
+                            </button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
