@@ -56,7 +56,7 @@
                                 <input type="radio"
                                        name="selectRow"
                                        ng-value="row[primaryKey]"
-                                       ng-model="row.__selected"
+                                       ng-click="singleSelect($event,row)"
                                        ng-disabled="isRowDisabled(row)">
                                 <i></i>
                             </label>
@@ -146,7 +146,7 @@
                                 <input type="radio"
                                        name="selectRow"
                                        ng-value="row[primaryKey]"
-                                       ng-model="row.__selected"
+                                       ng-click="singleSelect($event,row)"
                                        ng-disabled="isRowDisabled(row)">
                                 <i></i>
                             </label>

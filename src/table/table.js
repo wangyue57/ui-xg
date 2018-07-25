@@ -185,6 +185,17 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader'])
                 }
             };
 
+            $scope.singleSelect = function ($event, rowItem) {
+                if ($scope.onSelect) {
+                    $scope.onSelect(
+                        rowItem[$scope.primaryKey],
+                        true,
+                        [rowItem[$scope.primaryKey]],
+                        $event
+                    );
+                }
+            };
+
             $scope.selectAllRow = function ($event) {
                 $scope.__allRowSelected = $event.target.checked;
                 angular.forEach($scope.data, row => row.__selected = $event.target.checked && !$scope.isRowDisabled(row));
