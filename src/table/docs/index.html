@@ -1,5 +1,6 @@
 <div ng-controller="tableDemoCtrl">
     <button ng-click="refresh()">刷新数据</button>
+    <button ng-click="showAllSelected()">展示所有选中行</button>
     <label>
         <input type="checkbox" ng-model="useSelect">
         表格可选
@@ -22,7 +23,7 @@
     </label>
 
     <div ng-show="useSelect">
-        {{selectedText}}
+        {{selectActionText}}
     </div>
 
     <uix-table
@@ -33,6 +34,7 @@
             single="single"
             on-select="onSelect"
             on-select-all="onSelectAll"
+            selected-row-map="selectedRowMap"
             primary-key="primaryKey"
             table-loader="tableLoader"
             fix-head="fixHead">

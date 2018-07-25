@@ -32,7 +32,7 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader'])
 
         this.initWatch = function () {
             $scope.$watch('data', () => {
-                $scope.__allRowSelected = $scope.data.every(row => row.__selected || $scope.isRowDisabled(row));
+                $scope.__allRowSelected = $scope.data.every(row => $scope.selectedRowMap[row[$scope.primaryKey]] || $scope.isRowDisabled(row));
             });
 
             $scope.$watch('columns', () => {
@@ -170,27 +170,26 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader'])
 
         this.initSelectAble = function () {
             $scope.__allRowSelected = false;
+            $scope.selectedRowMap = $scope.selectedRowMap || {};
 
-            $scope.selectRow = function ($event, rowItem) {
-                rowItem.__selected = $event.target.checked;
-                $scope.__allRowSelected = $scope.data.every(row => row.__selected || $scope.isRowDisabled(row));
+            $scope.selectRow = function ($event, clickedRow) {
+                $scope.__allRowSelected = $scope.data.every(row => $scope.selectedRowMap[row[$scope.primaryKey]] || $scope.isRowDisabled(row));
 
                 if ($scope.onSelect) {
                     $scope.onSelect(
-                        rowItem[$scope.primaryKey],
-                        rowItem.__selected,
-                        $scope.data.filter(row => row.__selected).map(row => row[$scope.primaryKey]),
+                        clickedRow[$scope.primaryKey],
+                        $event.target.checked,
+                        Object.keys($scope.selectedRowMap).filter(rowKey => $scope.selectedRowMap[rowKey]),
                         $event
                     );
                 }
             };
-
-            $scope.singleSelect = function ($event, rowItem) {
+            $scope.singleSelect = function ($event, clickedRow) {
                 if ($scope.onSelect) {
                     $scope.onSelect(
-                        rowItem[$scope.primaryKey],
+                        clickedRow[$scope.primaryKey],
                         true,
-                        [rowItem[$scope.primaryKey]],
+                        [clickedRow[$scope.primaryKey]],
                         $event
                     );
                 }
@@ -198,12 +197,14 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader'])
 
             $scope.selectAllRow = function ($event) {
                 $scope.__allRowSelected = $event.target.checked;
-                angular.forEach($scope.data, row => row.__selected = $event.target.checked && !$scope.isRowDisabled(row));
+                angular.forEach($scope.data, row => {
+                    $scope.selectedRowMap[row[$scope.primaryKey]] = $event.target.checked && !$scope.isRowDisabled(row)
+                });
 
                 if ($scope.onSelectAll) {
                     $scope.onSelectAll(
                         $scope.__allRowSelected,
-                        $scope.data.filter(row => row.__selected).map(row => row[$scope.primaryKey]),
+                        Object.keys($scope.selectedRowMap).filter(rowKey => $scope.selectedRowMap[rowKey]),
                         $event
                     );
                 }
@@ -231,6 +232,7 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader'])
                 single: '=?',
                 onSelect: '=?',
                 onSelectAll: '=?',
+                selectedRowMap: '=?',
                 enableProp: '@?',
                 disableProp: '@?',
             },

@@ -6,6 +6,9 @@ angular.module('uixDemo').controller('tableDemoCtrl', ['$scope', '$timeout', fun
     $scope.useSelect = true;
     // 表格是否单选，在useSelect为true时，此参数有效
     $scope.single = false;
+    // 一个对象，用于记录表格的选中情况， eg:
+    // {rowId1: true, rowId2: false} 表示第一行被选中，第二行未选中，rowId1为设置的主键
+    $scope.selectedRowMap = {};
     // 表格加载状态，引用了uixTableLoader
     $scope.tableLoader = 0;
     // 表格主键，若表格主键不在表格中展示，可在此直接设置（因为性能原因，表格主键必须设置，在此处，或者在columns中
@@ -67,16 +70,17 @@ angular.module('uixDemo').controller('tableDemoCtrl', ['$scope', '$timeout', fun
     });
     // 用户手动选择/取消选择某行的回调
     $scope.onSelect = function (id, selected, allSelected, event) {
-        $scope.selectedText = allSelected.length
-            ? `当前已经选中第${allSelected.join('、')}行`
-            : '当前无选中行';
+        $scope.selectActionText = `此次点击${selected ? '' : '取消'}选中了第${id}行`;
+
     };
     // 用户全选/取消全选的回调
     $scope.onSelectAll = function (selected, allSelected, event) {
-        $scope.selectedText = `当前已经选中第${allSelected.join('、')}行`;
-        $scope.selectedText = allSelected.length
-            ? `当前已经选中第${allSelected.join('、')}行`
-            : '当前无选中行';
+        $scope.selectActionText = `此次点击进行了${selected ? '' : '取消'}全选`;
+    };
+
+    $scope.showAllSelected = function () {
+        const selectedRows = Object.keys($scope.selectedRowMap).filter(rowKey => $scope.selectedRowMap[rowKey]);
+        alert(selectedRows.length ? `当前已选中第${selectedRows.join('、')}行` : '当前没有选中行')
     };
 
 

@@ -47,7 +47,7 @@
                         <td ng-show="useSelect" class="text-center" ng-style="{width: 50*widthRadio+'px'}">
                             <label class="i-checks" ng-show="!single">
                                 <input type="checkbox"
-                                       ng-model="row.__selected"
+                                       ng-model="selectedRowMap[row[primaryKey]]"
                                        ng-disabled="isRowDisabled(row)"
                                        ng-click="selectRow($event, row)">
                                 <i></i>
@@ -137,7 +137,7 @@
                         <td ng-show="useSelect" class="text-center" ng-style="{width: 50*widthRadio+'px'}">
                             <label class="i-checks" ng-show="!single">
                                 <input type="checkbox"
-                                       ng-model="row.__selected"
+                                       ng-model="selectedRowMap[row[primaryKey]]"
                                        ng-disabled="isRowDisabled(row)"
                                        ng-click="selectRow($event, row)">
                                 <i></i>
