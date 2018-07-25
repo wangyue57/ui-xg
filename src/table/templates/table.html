@@ -1,5 +1,7 @@
 <div class="uix-table-box">
-    <div class="uix-table-container" ng-style="{width:width?width+'px':'auto'}">
+    <!-- ***************** 主表格 start ***************** -->
+    <div class="uix-table-container uix-table-main">
+        <!-- ***************** 主表格 固定表头 start ***************** -->
         <div class="uix-table-header-container" ng-show="fixHead" ng-style="{width:tableWidth+'px'}">
             <table class="uix-table">
                 <thead>
@@ -11,7 +13,7 @@
                             <i></i>
                         </label>
                     </th>
-                    <th ng-repeat="col in columns track by col.key" ng-style="{width: col.width+'px'}">
+                    <th ng-repeat="col in columns track by col.name" ng-style="{width: widthRadio*col.width+'px'}">
                         {{col.title}}
                     </th>
                     <th ng-show="operations" ng-style="{width: 150*widthRadio+'px'}">操作</th>
@@ -19,9 +21,10 @@
                 </thead>
             </table>
         </div>
+        <!-- ***************** 主表格 固定表头 end ***************** -->
 
-        <div class="uix-table-body-container"
-             ng-style="{width:tableWidth+'px',height:(fixHead?tableHeight:tableHeight+36)+'px'}">
+        <!-- ***************** 主表格 表格体 start ***************** -->
+        <div class="uix-table-body-container" ng-style="{width:tableWidth+'px',height:tableHeight+(!fixHead&&36)+'px'}">
             <div class="uix-table-body">
                 <table class="uix-table" uix-table-loader="tableLoader" loader-height="450">
                     <thead ng-show="!fixHead">
@@ -33,14 +36,14 @@
                                 <i></i>
                             </label>
                         </th>
-                        <th ng-repeat="col in columns track by col.key" ng-style="{width: col.width+'px'}">
+                        <th ng-repeat="col in columns track by col.name" ng-style="{width: widthRadio*col.width+'px'}">
                             {{col.title}}
                         </th>
                         <th ng-show="operations" ng-style="{width: 150*widthRadio+'px'}">操作</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr ng-repeat="row in data track by row.id">
+                    <tr ng-repeat="row in data track by row[primaryKey]">
                         <td ng-show="useSelect" class="text-center" ng-style="{width: 50*widthRadio+'px'}">
                             <label class="i-checks" ng-show="!single">
                                 <input type="checkbox"
@@ -52,20 +55,25 @@
                             <label class="i-checks" ng-show="single">
                                 <input type="radio"
                                        name="selectRow"
-                                       ng-value="row.id"
+                                       ng-value="row[primaryKey]"
                                        ng-model="row.__selected"
                                        ng-disabled="isRowDisabled(row)">
                                 <i></i>
                             </label>
                         </td>
-                        <td ng-repeat="col in columns track by col.key" ng-style="{width: col.width+'px'}">
-                            {{col.filter ? col.filter(row[col.key], row) : row[col.key]}}
+                        <td ng-repeat="col in columns track by col.name" ng-style="{width: widthRadio*col.width+'px'}">
+                            <div ng-if="col.formatter"
+                                 ng-bind-html="$sce.trustAsHtml(col.formatter(row[col.name], row))">
+                            </div>
+                            <div ng-if="!col.formatter">
+                                row[col.name]
+                            </div>
                         </td>
                         <td ng-show="operations" ng-style="{width: 150*widthRadio+'px'}">
                             <button ng-repeat="opt in operations"
                                     title="{{opt.title}}"
                                     ng-show="opt.showOpt(row)"
-                                    ng-click="opt.clickHandler(row)"
+                                    ng-click="opt.clickHandler(row[primaryKey],row)"
                                     class="btn btn-sm btn-default m-l-sm">
                                 <i class="{{opt.icon}}"></i>
                                 {{opt.title}}
@@ -76,9 +84,15 @@
                 </table>
             </div>
         </div>
+        <!-- ***************** 主表格 表格体 end ***************** -->
     </div>
+    <!-- ***************** 主表格 end ***************** -->
 
-    <div class="uix-table-container uix-table-pre-frozen" ng-show="preFixCols" ng-style="{width: preFixWidth+'px'}">
+
+    <!-- ***************** 前置冻结表格 start ***************** -->
+    <div class="uix-table-container uix-table-pre-frozen"
+         ng-show="preFixCols" ng-style="{width: widthRadio*preFixWidth+'px'}">
+        <!-- ***************** 前置冻结表格 固定表头 start ***************** -->
         <div class="uix-table-header-container" ng-show="fixHead">
             <table class="uix-table">
                 <thead>
@@ -90,15 +104,17 @@
                             <i></i>
                         </label>
                     </th>
-                    <th ng-repeat="col in preFixCols track by col.key" ng-style="{width: col.width+'px'}">
+                    <th ng-repeat="col in preFixCols track by col.name" ng-style="{width: widthRadio*col.width+'px'}">
                         {{col.title}}
                     </th>
                 </tr>
                 </thead>
             </table>
         </div>
+        <!-- ***************** 前置冻结表格 固定表头 end ***************** -->
 
-        <div class="uix-table-body-container" ng-style="{height:(fixHead?tableHeight:tableHeight+36)+'px'}">
+        <!-- ***************** 前置冻结表格 表格体 start ***************** -->
+        <div class="uix-table-body-container" ng-style="{height:tableHeight+(!fixHead&&36)+'px'}">
             <div class="uix-table-body">
                 <table class="uix-table" uix-table-loader="tableLoader" loader-height="0">
                     <thead ng-show="!fixHead">
@@ -110,13 +126,14 @@
                                 <i></i>
                             </label>
                         </th>
-                        <th ng-repeat="col in preFixCols track by col.key" ng-style="{width: col.width+'px'}">
+                        <th ng-repeat="col in preFixCols track by col.name"
+                            ng-style="{width: widthRadio*col.width+'px'}">
                             {{col.title}}
                         </th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr ng-repeat="row in data track by row.id">
+                    <tr ng-repeat="row in data track by row[primaryKey]">
                         <td ng-show="useSelect" class="text-center" ng-style="{width: 50*widthRadio+'px'}">
                             <label class="i-checks" ng-show="!single">
                                 <input type="checkbox"
@@ -128,28 +145,41 @@
                             <label class="i-checks" ng-show="single">
                                 <input type="radio"
                                        name="selectRow"
-                                       ng-value="row.id"
+                                       ng-value="row[primaryKey]"
                                        ng-model="row.__selected"
                                        ng-disabled="isRowDisabled(row)">
                                 <i></i>
                             </label>
                         </td>
-                        <td ng-repeat="col in preFixCols track by col.key" ng-style="{width: col.width+'px'}">
-                            {{col.filter ? col.filter(row[col.key], row) : row[col.key]}}
+                        <td ng-repeat="col in preFixCols track by col.name"
+                            ng-style="{width: widthRadio*col.width+'px'}">
+                            <div ng-if="col.formatter"
+                                 ng-bind-html="$sce.trustAsHtml(col.formatter(row[col.name], row))">
+                            </div>
+                            <div ng-if="!col.formatter">
+                                row[col.name]
+                            </div>
                         </td>
                     </tr>
                     </tbody>
                 </table>
             </div>
         </div>
+        <!-- ***************** 前置冻结表格 表格体 end ***************** -->
     </div>
+    <!-- ***************** 前置冻结表格 end ***************** -->
 
-    <div class="uix-table-container uix-table-post-frozen" ng-show="postFixCols" ng-style="{width: postFixWidth+'px'}">
+
+    <!-- ***************** 后置冻结表格 start ***************** -->
+    <div class="uix-table-container uix-table-post-frozen"
+         ng-show="postFixCols" ng-style="{width: widthRadio*postFixWidth+'px'}">
+
+        <!-- ***************** 后置冻结表格 固定表头 start ***************** -->
         <div class="uix-table-header-container" ng-show="fixHead">
             <table class="uix-table">
                 <thead>
                 <tr>
-                    <th ng-repeat="col in postFixCols track by col.key" ng-style="{width: col.width+'px'}">
+                    <th ng-repeat="col in postFixCols track by col.name" ng-style="{width: widthRadio*col.width+'px'}">
                         {{col.title}}
                     </th>
                     <th ng-show="operations" ng-style="{width: 150*widthRadio+'px'}">操作</th>
@@ -157,28 +187,36 @@
                 </thead>
             </table>
         </div>
+        <!-- ***************** 后置冻结表格 固定表头 end ***************** -->
 
-        <div class="uix-table-body-container" ng-style="{height:(fixHead?tableHeight:tableHeight+36)+'px'}">
+        <!-- ***************** 后置冻结表格 表格体 start ***************** -->
+        <div class="uix-table-body-container" ng-style="{height:tableHeight+(!fixHead&&36)+'px'}">
             <div class="uix-table-body">
                 <table class="uix-table" uix-table-loader="tableLoader" loader-height="0">
                     <thead ng-show="!fixHead">
                     <tr>
-                        <th ng-repeat="col in postFixCols track by col.key" ng-style="{width: col.width+'px'}">
+                        <th ng-repeat="col in postFixCols track by col.name"
+                            ng-style="{width: widthRadio*col.width+'px'}">
                             {{col.title}}
                         </th>
                         <th ng-show="operations" ng-style="{width: 150*widthRadio+'px'}">操作</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr ng-repeat="row in data track by row.id">
-                        <td ng-repeat="col in postFixCols track by col.key" ng-style="{width: col.width+'px'}">
-                            {{col.filter ? col.filter(row[col.key], row) : row[col.key]}}
+                    <tr ng-repeat="row in data track by row[primaryKey]">
+                        <td ng-repeat="col in postFixCols track by col.name"
+                            ng-style="{width: widthRadio*col.width+'px'}">
+                            <div ng-bind-html="$sce.trustAsHtml(col.formatter(row[col.name], row))"
+                                 ng-if="col.formatter"></div>
+                            <div ng-if="!col.formatter">
+                                row[col.name]
+                            </div>
                         </td>
                         <td ng-show="operations" ng-style="{width: 150*widthRadio+'px'}">
                             <button ng-repeat="opt in operations"
                                     title="{{opt.title}}"
                                     ng-show="opt.showOpt(row)"
-                                    ng-click="opt.clickHandler(row)"
+                                    ng-click="opt.clickHandler(row[primaryKey],row)"
                                     class="btn btn-sm btn-default m-l-sm">
                                 <i class="{{opt.icon}}"></i>
                                 {{opt.title}}
@@ -189,5 +227,7 @@
                 </table>
             </div>
         </div>
+        <!-- ***************** 后置冻结表格 表格体 end ***************** -->
     </div>
+    <!-- ***************** 后置冻结表格 end ***************** -->
 </div>

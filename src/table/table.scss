@@ -1,7 +1,9 @@
 * {
-  margin: 0;
-  padding: 0;
   box-sizing: border-box;
+}
+
+.m-l-sm {
+  margin-left: 10px;
 }
 
 .uix-table {
@@ -12,8 +14,8 @@
   border-collapse: collapse;
   background-color: #fff;
 
-  tr {
-    line-height: 35px;
+  tbody tr {
+    line-height: 30px;
   }
 
   tr:nth-of-type(odd) {
@@ -21,7 +23,7 @@
   }
 
   th, td {
-    padding: 8px;
+    padding: 8px 15px;
     text-align: left;
     vertical-align: top;
     border-top: 1px solid #eaeff0;
@@ -91,6 +93,10 @@
   left: 0;
   top: 0;
 
+  &.show-shadow {
+    box-shadow: 6px 0 6px -4px rgba(0, 0, 0, .15);
+  }
+
   .uix-table-body-container::-webkit-scrollbar {
     display: none
   }
@@ -101,6 +107,9 @@
   right: 0;
   top: 0;
 
+  &.show-shadow {
+    box-shadow: -6px 0 6px -4px rgba(0, 0, 0, .15);
+  }
   .uix-table-body-container::-webkit-scrollbar {
     display: none
   }

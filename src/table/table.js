@@ -5,15 +5,29 @@
  * Date:2018-07-20
  */
 angular.module('ui.xg.table', ['ui.xg.tableLoader'])
-    .controller('uixTableCtrl', ['$scope', '$timeout', function ($scope, $timeout) {
+    .controller('uixTableCtrl', ['$scope', '$timeout', '$sce', function ($scope, $timeout, $sce) {
+
         this.init = function () {
-            this.initWatch();
+            $scope.$sce = $sce;
+            this.processCols();
             this.setTableSize();
             this.initFixTable();
 
             if ($scope.useSelect) {
                 this.initSelectAble();
             }
+
+            this.initWatch();
+        };
+
+        this.processCols = function () {
+            angular.forEach($scope.columns, col => {
+                col.width = col.width || 150;
+
+                if (col.key) {
+                    $scope.primaryKey = col.name;
+                }
+            });
         };
 
         this.initWatch = function () {
@@ -24,11 +38,15 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader'])
             $scope.$watch('columns', () => {
                 this.initFixTable();
             }, true);
+
+            $scope.$watch('useSelect', () => {
+                this.setTableSize();
+            });
         };
 
         this.setTableSize = function () {
             const parentWidth = this.el.offsetWidth;
-            let totalWidth = $scope.columns.reduce((res, col) => res + (col.width || 150), 0);
+            let totalWidth = $scope.columns.reduce((res, col) => res + col.width, 0);
             if ($scope.operations) {
                 totalWidth += 150;
             }
@@ -39,9 +57,6 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader'])
             $scope.tableHeight = $scope.height || 450;
             $scope.tableWidth = Math.max(parentWidth, totalWidth);
             $scope.widthRadio = $scope.tableWidth / totalWidth;
-            angular.forEach($scope.columns, col => {
-                col.width = (col.width || 150) * $scope.widthRadio;
-            });
         };
 
         this.initFixTable = function () {
@@ -69,14 +84,14 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader'])
             if (preFixCols.length) {
                 let preFixWidth = preFixCols.reduce((res, col) => res + col.width, 0);
                 if ($scope.useSelect) {
-                    preFixWidth += 50 * $scope.widthRadio;
+                    preFixWidth += 50;
                 }
 
                 $scope.preFixCols = preFixCols;
                 $scope.preFixWidth = preFixWidth;
 
                 $timeout(() => {
-                    const tableContainer = this.el.querySelector('.uix-table-container .uix-table-body-container');
+                    const tableContainer = this.el.querySelector('.uix-table-main .uix-table-body-container');
                     const fixTableContainer = this.el.querySelector('.uix-table-pre-frozen .uix-table-body-container');
                     this.syncFixTable(tableContainer, fixTableContainer);
                 });
@@ -87,18 +102,38 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader'])
             if (postFixCols.length) {
                 let postFixWidth = postFixCols.reduce((res, col) => res + col.width, 0);
                 if ($scope.operations) {
-                    postFixWidth += 150 * $scope.widthRadio;
+                    postFixWidth += 150;
                 }
 
                 $scope.postFixCols = postFixCols;
                 $scope.postFixWidth = postFixWidth;
                 $timeout(() => {
-                    const tableContainer = this.el.querySelector('.uix-table-container .uix-table-body-container');
+                    const tableContainer = this.el.querySelector('.uix-table-main .uix-table-body-container');
                     const fixTableContainer = this.el.querySelector('.uix-table-post-frozen .uix-table-body-container');
                     this.syncFixTable(tableContainer, fixTableContainer);
                 });
             } else {
                 $scope.postFixCols = null;
+            }
+
+            if (preFixCols.length || postFixCols.length) {
+                const mainContainer = this.el.querySelector('.uix-table-main');
+                const preContainer = this.el.querySelector('.uix-table-pre-frozen');
+                const postContainer = this.el.querySelector('.uix-table-post-frozen');
+
+                angular.element(mainContainer).on('scroll', function () {
+                    if (mainContainer.scrollLeft > 0) {
+                        preContainer.classList.add('show-shadow');
+                    } else {
+                        preContainer.classList.remove('show-shadow');
+                    }
+
+                    if (mainContainer.scrollLeft < $scope.tableWidth - mainContainer.offsetWidth) {
+                        postContainer.classList.add('show-shadow');
+                    } else {
+                        postContainer.classList.remove('show-shadow');
+                    }
+                }).triggerHandler('scroll');
             }
         };
 
@@ -126,10 +161,10 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader'])
                 tableContainer.scrollTop = fixTableContainer.scrollTop;
             });
 
-
             const trs = tableContainer.querySelectorAll('tbody tr');
             const fixTrs = fixTableContainer.querySelectorAll('tbody tr');
             for (let i = 0; i < trs.length; i++) {
+                fixTrs[i].style.height = trs[i].offsetHeight + 'px';
             }
         };
 
@@ -139,11 +174,28 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader'])
             $scope.selectRow = function ($event, rowItem) {
                 rowItem.__selected = $event.target.checked;
                 $scope.__allRowSelected = $scope.data.every(row => row.__selected || $scope.isRowDisabled(row));
+
+                if ($scope.onSelect) {
+                    $scope.onSelect(
+                        rowItem[$scope.primaryKey],
+                        rowItem.__selected,
+                        $scope.data.filter(row => row.__selected).map(row => row[$scope.primaryKey]),
+                        $event
+                    );
+                }
             };
 
             $scope.selectAllRow = function ($event) {
                 $scope.__allRowSelected = $event.target.checked;
                 angular.forEach($scope.data, row => row.__selected = $event.target.checked && !$scope.isRowDisabled(row));
+
+                if ($scope.onSelectAll) {
+                    $scope.onSelectAll(
+                        $scope.__allRowSelected,
+                        $scope.data.filter(row => row.__selected).map(row => row[$scope.primaryKey]),
+                        $event
+                    );
+                }
             };
 
             $scope.isRowDisabled = function (row) {
@@ -153,20 +205,21 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader'])
     }])
     .directive('uixTable', function () {
         return {
-            restrict: 'AE',
+            restrict: 'E',
             templateUrl: 'templates/table.html',
-            replace: true,
             require: ['uixTable'],
             scope: {
                 data: '=',
                 columns: '=',
                 tableLoader: '=',
-                width: '@?',
                 height: '@?',
+                primaryKey: '=?',
                 operations: '=?',
                 fixHead: '=?',
                 useSelect: '=?',
                 single: '=?',
+                onSelect: '=?',
+                onSelectAll: '=?',
                 enableProp: '@?',
                 disableProp: '@?',
             },

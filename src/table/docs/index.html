@@ -21,12 +21,19 @@
         冻结后两列
     </label>
 
+    <div ng-show="useSelect">
+        {{selectedText}}
+    </div>
+
     <uix-table
             data="data"
             columns="columns"
             operations="operations"
             use-select="useSelect"
             single="single"
+            on-select="onSelect"
+            on-select-all="onSelectAll"
+            primary-key="primaryKey"
             table-loader="tableLoader"
             fix-head="fixHead">
     </uix-table>
