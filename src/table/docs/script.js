@@ -1,9 +1,9 @@
 angular.module('uixDemo').controller('tableDemoCtrl', ['$scope', '$timeout', function ($scope, $timeout) {
 
     // 是否固定表头
-    $scope.fixHead = true;
+    $scope.fixHead = false;
     // 表格是否可选择
-    $scope.useSelect = true;
+    $scope.useSelect = false;
     // 表格是否单选，在useSelect为true时，此参数有效
     $scope.single = false;
     // 一个对象，用于记录表格的选中情况， eg:

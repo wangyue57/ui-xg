@@ -20,6 +20,7 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader'])
             this.initWatch();
         };
 
+        // columns预处理： 默认宽度，设置主键
         this.processCols = function () {
             angular.forEach($scope.columns, col => {
                 col.width = col.width || 150;
@@ -32,7 +33,9 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader'])
 
         this.initWatch = function () {
             $scope.$watch('data', () => {
-                $scope.__allRowSelected = $scope.data.every(row => $scope.selectedRowMap[row[$scope.primaryKey]] || $scope.isRowDisabled(row));
+                if ($scope.useSelect) {
+                    $scope.__allRowSelected = $scope.data.every(row => $scope.selectedRowMap[row[$scope.primaryKey]] || $scope.isRowDisabled(row));
+                }
             });
 
             $scope.$watch('columns', () => {
@@ -40,6 +43,10 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader'])
             }, true);
 
             $scope.$watch('useSelect', () => {
+                this.setTableSize();
+            });
+
+            $scope.$watch('fixHead', () => {
                 this.setTableSize();
             });
         };
@@ -54,7 +61,9 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader'])
                 totalWidth += 50;
             }
 
-            $scope.tableHeight = $scope.height || 450;
+            // 当固定表头时，必须设置表格高度
+            $scope.tableHeight = $scope.height || ($scope.fixHead ? 450 : NaN);
+            // 当表格宽度小于父盒子宽度时，放大到表格宽度父盒子宽度
             $scope.tableWidth = Math.max(parentWidth, totalWidth);
             $scope.widthRadio = $scope.tableWidth / totalWidth;
         };
@@ -137,6 +146,7 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader'])
             }
         };
 
+        // 冻结表格与主表格同步滚动 &  冻结表格与主表格tr设置为相同高度
         this.syncFixTable = function (tableContainer, fixTableContainer) {
             let tableTimeStamp = null;
             let fixTableTimeStamp = null;
@@ -168,6 +178,7 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader'])
             }
         };
 
+        // 使用selectedRowMap设置表格选中逻辑
         this.initSelectAble = function () {
             $scope.__allRowSelected = false;
             $scope.selectedRowMap = $scope.selectedRowMap || {};
