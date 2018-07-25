@@ -230,4 +230,7 @@
         <!-- ***************** 后置冻结表格 表格体 end ***************** -->
     </div>
     <!-- ***************** 后置冻结表格 end ***************** -->
+
+    <uix-pager class="pull-right pagination-sm" total-items="pages.totalCount" ng-model="pages.pageNo"
+               items-per-page="pages.pageSize" ng-change="pageChangeHandler()"></uix-pager>
 </div>

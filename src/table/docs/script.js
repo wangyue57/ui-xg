@@ -1,4 +1,4 @@
-angular.module('uixDemo').controller('tableDemoCtrl', ['$scope', '$timeout', function ($scope, $timeout) {
+angular.module('uixDemo').controller('tableDemoCtrl', ['$scope', '$timeout', '$q', function ($scope, $timeout, $q) {
 
     // 是否固定表头
     $scope.fixHead = false;
@@ -9,8 +9,6 @@ angular.module('uixDemo').controller('tableDemoCtrl', ['$scope', '$timeout', fun
     // 一个对象，用于记录表格的选中情况， eg:
     // {rowId1: true, rowId2: false} 表示第一行被选中，第二行未选中，rowId1为设置的主键
     $scope.selectedRowMap = {};
-    // 表格加载状态，引用了uixTableLoader
-    $scope.tableLoader = 0;
     // 表格主键，若表格主键不在表格中展示，可在此直接设置（因为性能原因，表格主键必须设置，在此处，或者在columns中
     $scope.primaryKey = 'id';
     // 表头数据
@@ -43,7 +41,7 @@ angular.module('uixDemo').controller('tableDemoCtrl', ['$scope', '$timeout', fun
             },
             clickHandler(id, row) {
                 // 操作按钮事件函数，第一个参数为该行的主键值，常可设为单据id，第二个参数为此行完整数据
-                alert(`点击了第${id + 1}行的删除按钮！${row.__selected ? '此行已选中！' : ''}`);
+                alert(`点击了第${id}行的删除按钮！${row.__selected ? '此行已选中！' : ''}`);
             },
             icon: 'fa fa-delete',
             title: '删除'
@@ -53,7 +51,7 @@ angular.module('uixDemo').controller('tableDemoCtrl', ['$scope', '$timeout', fun
                 return row.id % 3;
             },
             clickHandler(id, row) {
-                alert(`点击了第${id + 1}行的添加按钮！${row.__selected ? '此行已选中！' : ''}`);
+                alert(`点击了第${id}行的添加按钮！${row.__selected ? '此行已选中！' : ''}`);
             },
             icon: 'fa fa-add',
             title: '添加'
@@ -86,8 +84,7 @@ angular.module('uixDemo').controller('tableDemoCtrl', ['$scope', '$timeout', fun
 
     // 刷新表格时，需先设置tableLoader = 1，重新获取数据成功后，设置tableLoader = 0，同uixTableLoader
     $scope.refresh = function () {
-        $scope.tableLoader = 1;
-        $timeout(() => $scope.tableLoader = 0, 2000)
+        $scope.pageChanged()
     };
 
     $scope.fixPre = function ($event) {
@@ -99,4 +96,15 @@ angular.module('uixDemo').controller('tableDemoCtrl', ['$scope', '$timeout', fun
         $scope.columns[18].fix = $event.target.checked;
         $scope.columns[19].fix = $event.target.checked;
     };
+    $scope.pages = {
+        pageNo: 1,
+        pageSize: 20,
+        totalCount: 100
+    };
+    $scope.pageChanged = function () {
+        // 表格外的pageChange函数，只需要处理数据，然后resolve最后的tableLoader：-1 失败，0成功，2无数据
+        return $q(resolve => {
+            $timeout(() => resolve(0), 2000)
+        })
+    }
 }]);

@@ -4,7 +4,7 @@
  * Author: your_email@gmail.com
  * Date:2018-07-20
  */
-angular.module('ui.xg.table', ['ui.xg.tableLoader'])
+angular.module('ui.xg.table', ['ui.xg.tableLoader', 'ui.xg.pager'])
     .controller('uixTableCtrl', ['$scope', '$timeout', '$sce', function ($scope, $timeout, $sce) {
 
         this.init = function () {
@@ -12,10 +12,8 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader'])
             this.processCols();
             this.setTableSize();
             this.initFixTable();
-
-            if ($scope.useSelect) {
-                this.initSelectAble();
-            }
+            this.initPageChangeHandler();
+            this.initSelectAble();
 
             this.initWatch();
         };
@@ -33,9 +31,7 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader'])
 
         this.initWatch = function () {
             $scope.$watch('data', () => {
-                if ($scope.useSelect) {
-                    $scope.__allRowSelected = $scope.data.every(row => $scope.selectedRowMap[row[$scope.primaryKey]] || $scope.isRowDisabled(row));
-                }
+                $scope.__allRowSelected = $scope.data.every(row => $scope.selectedRowMap[row[$scope.primaryKey]] || $scope.isRowDisabled(row));
             });
 
             $scope.$watch('columns', () => {
@@ -207,6 +203,7 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader'])
             };
 
             $scope.selectAllRow = function ($event) {
+                console.log('selectAllRow', $event);
                 $scope.__allRowSelected = $event.target.checked;
                 angular.forEach($scope.data, row => {
                     $scope.selectedRowMap[row[$scope.primaryKey]] = $event.target.checked && !$scope.isRowDisabled(row)
@@ -225,6 +222,23 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader'])
                 return row[$scope.enableProp] === false || row[$scope.disableProp] === true;
             }
         };
+
+        this.initPageChangeHandler = function () {
+            $scope.pageChangeHandler = function () {
+                if ($scope.isLoading) {
+                    return
+                }
+                $scope.tableLoader = 1;
+                $scope.isLoading = true;
+                $scope.pageChanged().then(tableLoader => {
+                    $scope.tableLoader = tableLoader;
+                    $scope.isLoading = false;
+                }, () => {
+                    $scope.tableLoader = -1;
+                    $scope.isLoading = false;
+                });
+            }
+        }
     }])
     .directive('uixTable', function () {
         return {
@@ -234,7 +248,6 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader'])
             scope: {
                 data: '=',
                 columns: '=',
-                tableLoader: '=',
                 height: '@?',
                 primaryKey: '=?',
                 operations: '=?',
@@ -246,6 +259,8 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader'])
                 selectedRowMap: '=?',
                 enableProp: '@?',
                 disableProp: '@?',
+                pages: '=?',
+                pageChanged: '=?'
             },
             controller: 'uixTableCtrl',
             link: function (scope, el, attrs, ctrls) {
