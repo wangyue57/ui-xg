@@ -43,7 +43,10 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader', 'ui.xg.pager'])
             });
 
             $scope.$watch('fixHead', this.setTableSize);
-            $scope.$watch('useSelect', this.setTableSize);
+            $scope.$watch('useSelect', () => {
+                this.setTableSize();
+                this.initFixTable();
+            });
             $scope.$watch('columns', this.initFixTable, true);
         };
 
