@@ -26,7 +26,7 @@
         <!-- ***************** 主表格 表格体 start ***************** -->
         <div class="uix-table-body-container" ng-style="{width:tableWidth+'px',height:tableHeight+(!fixHead&&36)+'px'}">
             <div class="uix-table-body">
-                <table class="uix-table" uix-table-loader="tableLoader" loader-height="450">
+                <table class="uix-table">
                     <thead ng-show="!fixHead">
                     <tr>
                         <th ng-show="useSelect" class="text-center" ng-style="{width: 50*widthRadio+'px'}">
@@ -42,7 +42,19 @@
                         <th ng-show="operations" ng-style="{width: 150*widthRadio+'px'}">操作</th>
                     </tr>
                     </thead>
-                    <tbody>
+                    <!-- 加载失败 -->
+                    <tbody ng-show="tableLoader===-1" class="loading-info">
+                    <tr>
+                        <td colspan="100%">
+                            <div class="error-tip" ng-style="{width: parentWidth+'px'}">
+                                <span class="error-text">数据加载失败! </span>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+
+                    <!-- 数据 -->
+                    <tbody ng-show="tableLoader===0" class="main">
                     <tr ng-repeat="row in data track by row[primaryKey]">
                         <td ng-show="useSelect" class="text-center" ng-style="{width: 50*widthRadio+'px'}">
                             <label class="i-checks" ng-show="!single">
@@ -81,6 +93,28 @@
                         </td>
                     </tr>
                     </tbody>
+
+                    <!-- 加载中 -->
+                    <tbody ng-show="tableLoader===1" class="loading-info">
+                    <tr>
+                        <td colspan="100%">
+                            <div class="loading" ng-style="{width: parentWidth+'px'}">
+                                <i class="fa fa-spin fa-spinner loading-icon"></i>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+
+                    <!-- 无数据 -->
+                    <tbody ng-show="tableLoader===2" class="loading-info">
+                    <tr>
+                        <td colspan="100%">
+                            <div class="error-tip" ng-style="{width: parentWidth+'px'}">
+                                <span class="error-text">数据列表为空! </span>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -91,7 +125,7 @@
 
     <!-- ***************** 前置冻结表格 start ***************** -->
     <div class="uix-table-container uix-table-pre-frozen"
-         ng-show="preFixCols" ng-style="{width: widthRadio*preFixWidth+'px'}">
+         ng-show="preFixCols&&tableLoader===0" ng-style="{width: widthRadio*preFixWidth+'px'}">
         <!-- ***************** 前置冻结表格 固定表头 start ***************** -->
         <div class="uix-table-header-container" ng-show="fixHead">
             <table class="uix-table">
@@ -116,7 +150,7 @@
         <!-- ***************** 前置冻结表格 表格体 start ***************** -->
         <div class="uix-table-body-container" ng-style="{height:tableHeight+(!fixHead&&36)+'px'}">
             <div class="uix-table-body">
-                <table class="uix-table" uix-table-loader="tableLoader" loader-height="0">
+                <table class="uix-table">
                     <thead ng-show="!fixHead">
                     <tr>
                         <th ng-show="useSelect" class="text-center" ng-style="{width: 50*widthRadio+'px'}">
@@ -172,7 +206,7 @@
 
     <!-- ***************** 后置冻结表格 start ***************** -->
     <div class="uix-table-container uix-table-post-frozen"
-         ng-show="postFixCols" ng-style="{width: widthRadio*postFixWidth+'px'}">
+         ng-show="postFixCols&&tableLoader===0" ng-style="{width: widthRadio*postFixWidth+'px'}">
 
         <!-- ***************** 后置冻结表格 固定表头 start ***************** -->
         <div class="uix-table-header-container" ng-show="fixHead">
@@ -192,7 +226,7 @@
         <!-- ***************** 后置冻结表格 表格体 start ***************** -->
         <div class="uix-table-body-container" ng-style="{height:tableHeight+(!fixHead&&36)+'px'}">
             <div class="uix-table-body">
-                <table class="uix-table" uix-table-loader="tableLoader" loader-height="0">
+                <table class="uix-table">
                     <thead ng-show="!fixHead">
                     <tr>
                         <th ng-repeat="col in postFixCols track by col.name"

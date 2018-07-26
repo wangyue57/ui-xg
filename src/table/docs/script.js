@@ -105,7 +105,7 @@ angular.module('uixDemo').controller('tableDemoCtrl', ['$scope', '$timeout', '$q
     $scope.pageChanged = function () {
         // 表格外的pageChange函数，只需要处理数据，然后resolve最后的tableLoader：-1 失败，0成功，2无数据
         return $q(resolve => {
-            $timeout(() => resolve(0), 2000)
+            $timeout(() => resolve(2), 2000)
         })
     }
 }]);

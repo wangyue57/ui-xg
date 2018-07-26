@@ -4,13 +4,15 @@
  * Author: your_email@gmail.com
  * Date:2018-07-20
  */
-angular.module('ui.xg.table', ['ui.xg.tableLoader', 'ui.xg.pager'])
+angular.module('ui.xg.table', ['ui.xg.pager'])
     .controller('uixTableCtrl', ['$scope', '$timeout', '$sce', function ($scope, $timeout, $sce) {
         this.init = function () {
             // 安全相关，ng-bind-html需要
             $scope.$sce = $sce;
             // 缓存多页数据
             $scope.allRowMap = {};
+            // loader相关
+            $scope.tableLoader = 0;
 
             this.initWatch();
             this.processCols();
@@ -53,7 +55,7 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader', 'ui.xg.pager'])
 
         // 设置表格宽高，如果为固定表头，必须要设置高度
         this.setTableSize = function () {
-            var parentWidth = this.el.offsetWidth;
+            $scope.parentWidth = this.el.parentNode.offsetWidth;
             var totalWidth = getTotalWidth($scope.columns);
             if ($scope.operations) {
                 totalWidth += 150;
@@ -65,7 +67,7 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader', 'ui.xg.pager'])
             // 当固定表头时，必须设置表格高度
             $scope.tableHeight = $scope.height || ($scope.fixHead ? 450 : NaN);
             // 当表格宽度小于父盒子宽度时，放大到表格宽度父盒子宽度
-            $scope.tableWidth = Math.max(parentWidth, totalWidth);
+            $scope.tableWidth = Math.max($scope.parentWidth, totalWidth);
             $scope.widthRadio = $scope.tableWidth / totalWidth;
         };
 
@@ -173,7 +175,7 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader', 'ui.xg.pager'])
                 tableContainer.scrollTop = fixTableContainer.scrollTop;
             });
 
-            var trs = tableContainer.querySelectorAll('tbody tr');
+            var trs = tableContainer.querySelectorAll('tbody.main tr');
             var fixTrs = fixTableContainer.querySelectorAll('tbody tr');
             for (var i = 0; i < trs.length; i++) {
                 fixTrs[i].style.height = trs[i].offsetHeight + 'px';
@@ -231,17 +233,15 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader', 'ui.xg.pager'])
         // wrap传入的pageChanged函数，封装tableLoader及防重
         this.initPageChangeHandler = function () {
             $scope.pageChangeHandler = function () {
-                if ($scope.isLoading) {
+                if ($scope.tableLoader === 1) {
                     return;
                 }
+
                 $scope.tableLoader = 1;
-                $scope.isLoading = true;
                 $scope.pageChanged().then(function (tableLoader) {
                     $scope.tableLoader = tableLoader;
-                    $scope.isLoading = false;
                 }, function () {
                     $scope.tableLoader = -1;
-                    $scope.isLoading = false;
                 });
             };
         };
