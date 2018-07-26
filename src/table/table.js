@@ -6,12 +6,11 @@
  */
 angular.module('ui.xg.table', ['ui.xg.tableLoader', 'ui.xg.pager'])
     .controller('uixTableCtrl', ['$scope', '$timeout', '$sce', function ($scope, $timeout, $sce) {
-
         this.init = function () {
+            // 安全相关，ng-bind-html需要
             $scope.$sce = $sce;
+            // 缓存多页数据
             $scope.allRowMap = {};
-            this.setTableSize = this.setTableSize.bind(this);
-            this.initFixTable = this.initFixTable.bind(this);
 
             this.initWatch();
             this.processCols();
@@ -23,36 +22,39 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader', 'ui.xg.pager'])
 
         // columns预处理： 默认宽度，设置主键
         this.processCols = function () {
-            angular.forEach($scope.columns, col => {
+            angular.forEach($scope.columns, function (col) {
                 col.width = col.width || 150;
 
                 if (col.key) {
                     $scope.primaryKey = col.name;
                 }
             });
-
-            if (!$scope.primaryKey) {
-                console.warn('a primary key is needed!')
-            }
         };
 
+        // 响应数据变化，一般是列表数据刷新后，增加数据缓存和重新判断全选状态
         this.initWatch = function () {
-            $scope.$watch('data', data => {
-                angular.forEach(data, row => $scope.allRowMap[row[$scope.primaryKey]] = row);
-                $scope.__allRowSelected = $scope.data.every(row => $scope.selectedRowMap[row[$scope.primaryKey]] || $scope.isRowDisabled(row));
-            });
+            var vm = this;
+            $scope.$watch('data', function (data) {
+                angular.forEach(data, function (row) {
+                    $scope.allRowMap[row[$scope.primaryKey]] = row;
+                });
 
-            $scope.$watch('fixHead', this.setTableSize);
-            $scope.$watch('useSelect', () => {
-                this.setTableSize();
-                this.initFixTable();
+                $scope.__allRowSelected = $scope.data.every(function (row) {
+                    return $scope.selectedRowMap[row[$scope.primaryKey]] || isRowDisabled(row);
+                });
             });
-            $scope.$watch('columns', this.initFixTable, true);
+            $scope.$watch('fixHead', vm.setTableSize.bind(vm));
+            $scope.$watch('columns', vm.initFixTable.bind(vm), true);
+            $scope.$watch('useSelect', function () {
+                vm.setTableSize();
+                vm.initFixTable();
+            });
         };
 
+        // 设置表格宽高，如果为固定表头，必须要设置高度
         this.setTableSize = function () {
-            const parentWidth = this.el.offsetWidth;
-            let totalWidth = $scope.columns.reduce((res, col) => res + col.width, 0);
+            var parentWidth = this.el.offsetWidth;
+            var totalWidth = getTotalWidth($scope.columns);
             if ($scope.operations) {
                 totalWidth += 150;
             }
@@ -67,11 +69,13 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader', 'ui.xg.pager'])
             $scope.widthRadio = $scope.tableWidth / totalWidth;
         };
 
+        // 初始化冻结列： 找出是否有冻结列 & 如果有冻结列初始化横向滚动是的冻结表格阴影
         this.initFixTable = function () {
-            let i, j;
-            const preFixCols = [];
-            const postFixCols = [];
-            const colLen = $scope.columns.length;
+            var i, j;
+            var vm = this;
+            var preFixCols = [];
+            var postFixCols = [];
+            var colLen = $scope.columns.length;
 
             for (i = 0; i < colLen; i++) {
                 if ($scope.columns[i].fix) {
@@ -90,7 +94,7 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader', 'ui.xg.pager'])
             }
 
             if (preFixCols.length) {
-                let preFixWidth = preFixCols.reduce((res, col) => res + col.width, 0);
+                var preFixWidth = getTotalWidth(preFixCols);
                 if ($scope.useSelect) {
                     preFixWidth += 50;
                 }
@@ -98,36 +102,37 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader', 'ui.xg.pager'])
                 $scope.preFixCols = preFixCols;
                 $scope.preFixWidth = preFixWidth;
 
-                $timeout(() => {
-                    const tableContainer = this.el.querySelector('.uix-table-main .uix-table-body-container');
-                    const fixTableContainer = this.el.querySelector('.uix-table-pre-frozen .uix-table-body-container');
-                    this.syncFixTable(tableContainer, fixTableContainer);
+                $timeout(function () {
+                    var tableContainer = vm.el.querySelector('.uix-table-main .uix-table-body-container');
+                    var fixTableContainer = vm.el.querySelector('.uix-table-pre-frozen .uix-table-body-container');
+                    vm.syncFixTable(tableContainer, fixTableContainer);
                 });
             } else {
                 $scope.preFixCols = null;
             }
 
             if (postFixCols.length) {
-                let postFixWidth = postFixCols.reduce((res, col) => res + col.width, 0);
+                var postFixWidth = getTotalWidth(postFixCols);
                 if ($scope.operations) {
                     postFixWidth += 150;
                 }
 
                 $scope.postFixCols = postFixCols;
                 $scope.postFixWidth = postFixWidth;
-                $timeout(() => {
-                    const tableContainer = this.el.querySelector('.uix-table-main .uix-table-body-container');
-                    const fixTableContainer = this.el.querySelector('.uix-table-post-frozen .uix-table-body-container');
-                    this.syncFixTable(tableContainer, fixTableContainer);
+
+                $timeout(function () {
+                    var tableContainer = vm.el.querySelector('.uix-table-main .uix-table-body-container');
+                    var fixTableContainer = vm.el.querySelector('.uix-table-post-frozen .uix-table-body-container');
+                    vm.syncFixTable(tableContainer, fixTableContainer);
                 });
             } else {
                 $scope.postFixCols = null;
             }
 
             if (preFixCols.length || postFixCols.length) {
-                const mainContainer = this.el.querySelector('.uix-table-main');
-                const preContainer = this.el.querySelector('.uix-table-pre-frozen');
-                const postContainer = this.el.querySelector('.uix-table-post-frozen');
+                var mainContainer = vm.el.querySelector('.uix-table-main');
+                var preContainer = vm.el.querySelector('.uix-table-pre-frozen');
+                var postContainer = vm.el.querySelector('.uix-table-post-frozen');
 
                 angular.element(mainContainer).on('scroll', function () {
                     if (mainContainer.scrollLeft > 0) {
@@ -147,19 +152,17 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader', 'ui.xg.pager'])
 
         // 冻结表格与主表格同步滚动 &  冻结表格与主表格tr设置为相同高度
         this.syncFixTable = function (tableContainer, fixTableContainer) {
-            let tableTimeStamp = null;
-            let fixTableTimeStamp = null;
+            var tableTimeStamp = null;
+            var fixTableTimeStamp = null;
 
-            angular.element(tableContainer)
-                .on('scroll', function (event) {
-                    if (event.timeStamp - fixTableTimeStamp < 100) {
-                        return;
-                    }
+            angular.element(tableContainer).on('scroll', function (event) {
+                if (event.timeStamp - fixTableTimeStamp < 100) {
+                    return;
+                }
 
-                    tableTimeStamp = event.timeStamp;
-                    fixTableContainer.scrollTop = tableContainer.scrollTop;
-                })
-                .triggerHandler('scroll');
+                tableTimeStamp = event.timeStamp;
+                fixTableContainer.scrollTop = tableContainer.scrollTop;
+            }).triggerHandler('scroll');
 
             angular.element(fixTableContainer).on('scroll', function (event) {
                 if (event.timeStamp - tableTimeStamp < 100) {
@@ -170,29 +173,30 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader', 'ui.xg.pager'])
                 tableContainer.scrollTop = fixTableContainer.scrollTop;
             });
 
-            const trs = tableContainer.querySelectorAll('tbody tr');
-            const fixTrs = fixTableContainer.querySelectorAll('tbody tr');
-            for (let i = 0; i < trs.length; i++) {
+            var trs = tableContainer.querySelectorAll('tbody tr');
+            var fixTrs = fixTableContainer.querySelectorAll('tbody tr');
+            for (var i = 0; i < trs.length; i++) {
                 fixTrs[i].style.height = trs[i].offsetHeight + 'px';
             }
         };
 
         // 使用selectedRowMap设置表格选中逻辑
         this.initSelectAble = function () {
-            const vm = this;
             $scope.__allRowSelected = false;
             $scope.selectedRowMap = $scope.selectedRowMap || {};
-            vm.syncSelectedRow();
+            syncSelectedRow();
 
             $scope.selectRow = function ($event, clickedRow) {
-                $scope.__allRowSelected = $scope.data.every(row => $scope.selectedRowMap[row[$scope.primaryKey]] || $scope.isRowDisabled(row));
-                vm.syncSelectedRow();
+                $scope.__allRowSelected = $scope.data.every(function (row) {
+                    return $scope.selectedRowMap[row[$scope.primaryKey]] || isRowDisabled(row);
+                });
+                syncSelectedRow();
 
                 if ($scope.onSelect) {
                     $scope.onSelect(
                         clickedRow[$scope.primaryKey],
                         $event.target.checked,
-                        Object.keys($scope.selectedRowMap).filter(rowKey => $scope.selectedRowMap[rowKey]),
+                        getSelectedRowId(),
                         $event
                     );
                 }
@@ -209,48 +213,62 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader', 'ui.xg.pager'])
             };
             $scope.selectAllRow = function ($event) {
                 $scope.__allRowSelected = $event.target.checked;
-                angular.forEach($scope.data, row => {
-                    $scope.selectedRowMap[row[$scope.primaryKey]] = $event.target.checked && !$scope.isRowDisabled(row)
+                angular.forEach($scope.data, function (row) {
+                    $scope.selectedRowMap[row[$scope.primaryKey]] = $event.target.checked && !isRowDisabled(row);
                 });
-                vm.syncSelectedRow();
+                syncSelectedRow();
 
                 if ($scope.onSelectAll) {
                     $scope.onSelectAll(
                         $scope.__allRowSelected,
-                        Object.keys($scope.selectedRowMap).filter(rowKey => $scope.selectedRowMap[rowKey]),
+                        getSelectedRowId(),
                         $event
                     );
                 }
             };
-            $scope.isRowDisabled = function (row) {
-                return row[$scope.enableProp] === false || row[$scope.disableProp] === true;
-            };
         };
 
-        this.syncSelectedRow = function () {
-            $scope.selectedRows = Object.entries($scope.selectedRowMap).reduce((res, [rowKey, selected]) => {
-                if (selected) {
-                    res.push($scope.allRowMap[rowKey]);
-                }
-                return res;
-            }, []);
-        };
-
+        // wrap传入的pageChanged函数，封装tableLoader及防重
         this.initPageChangeHandler = function () {
             $scope.pageChangeHandler = function () {
                 if ($scope.isLoading) {
-                    return
+                    return;
                 }
                 $scope.tableLoader = 1;
                 $scope.isLoading = true;
-                $scope.pageChanged().then(tableLoader => {
+                $scope.pageChanged().then(function (tableLoader) {
                     $scope.tableLoader = tableLoader;
                     $scope.isLoading = false;
-                }, () => {
+                }, function () {
                     $scope.tableLoader = -1;
                     $scope.isLoading = false;
                 });
-            }
+            };
+        };
+
+        function isRowDisabled(row) {
+            return row[$scope.enableProp] === false || row[$scope.disableProp] === true;
+        }
+
+        function syncSelectedRow() {
+            $scope.selectedRows = Object.entries($scope.selectedRowMap).reduce(function (res, entry) {
+                if (entry[1]) {
+                    res.push($scope.allRowMap[entry[0]]);
+                }
+                return res;
+            }, []);
+        }
+
+        function getSelectedRowId() {
+            return Object.keys($scope.selectedRowMap).filter(function (rowKey) {
+                return $scope.selectedRowMap[rowKey];
+            });
+        }
+
+        function getTotalWidth(columns) {
+            return columns.reduce(function (res, col) {
+                return res + col.width;
+            }, 0);
         }
     }])
     .directive('uixTable', function () {
@@ -278,9 +296,9 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader', 'ui.xg.pager'])
             },
             controller: 'uixTableCtrl',
             link: function (scope, el, attrs, ctrls) {
-                const tableCtrl = ctrls[0];
+                var tableCtrl = ctrls[0];
                 tableCtrl.el = el[0];
                 tableCtrl.init();
             }
-        }
+        };
     });
