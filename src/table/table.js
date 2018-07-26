@@ -9,13 +9,16 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader', 'ui.xg.pager'])
 
         this.init = function () {
             $scope.$sce = $sce;
+            $scope.allRowMap = {};
+            this.setTableSize = this.setTableSize.bind(this);
+            this.initFixTable = this.initFixTable.bind(this);
+
+            this.initWatch();
             this.processCols();
             this.setTableSize();
             this.initFixTable();
-            this.initPageChangeHandler();
             this.initSelectAble();
-
-            this.initWatch();
+            this.initPageChangeHandler();
         };
 
         // columns预处理： 默认宽度，设置主键
@@ -27,24 +30,21 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader', 'ui.xg.pager'])
                     $scope.primaryKey = col.name;
                 }
             });
+
+            if (!$scope.primaryKey) {
+                console.warn('a primary key is needed!')
+            }
         };
 
         this.initWatch = function () {
-            $scope.$watch('data', () => {
+            $scope.$watch('data', data => {
+                angular.forEach(data, row => $scope.allRowMap[row[$scope.primaryKey]] = row);
                 $scope.__allRowSelected = $scope.data.every(row => $scope.selectedRowMap[row[$scope.primaryKey]] || $scope.isRowDisabled(row));
             });
 
-            $scope.$watch('columns', () => {
-                this.initFixTable();
-            }, true);
-
-            $scope.$watch('useSelect', () => {
-                this.setTableSize();
-            });
-
-            $scope.$watch('fixHead', () => {
-                this.setTableSize();
-            });
+            $scope.$watch('fixHead', this.setTableSize);
+            $scope.$watch('useSelect', this.setTableSize);
+            $scope.$watch('columns', this.initFixTable, true);
         };
 
         this.setTableSize = function () {
@@ -176,11 +176,14 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader', 'ui.xg.pager'])
 
         // 使用selectedRowMap设置表格选中逻辑
         this.initSelectAble = function () {
+            const vm = this;
             $scope.__allRowSelected = false;
             $scope.selectedRowMap = $scope.selectedRowMap || {};
+            vm.syncSelectedRow();
 
             $scope.selectRow = function ($event, clickedRow) {
                 $scope.__allRowSelected = $scope.data.every(row => $scope.selectedRowMap[row[$scope.primaryKey]] || $scope.isRowDisabled(row));
+                vm.syncSelectedRow();
 
                 if ($scope.onSelect) {
                     $scope.onSelect(
@@ -201,13 +204,12 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader', 'ui.xg.pager'])
                     );
                 }
             };
-
             $scope.selectAllRow = function ($event) {
-                console.log('selectAllRow', $event);
                 $scope.__allRowSelected = $event.target.checked;
                 angular.forEach($scope.data, row => {
                     $scope.selectedRowMap[row[$scope.primaryKey]] = $event.target.checked && !$scope.isRowDisabled(row)
                 });
+                vm.syncSelectedRow();
 
                 if ($scope.onSelectAll) {
                     $scope.onSelectAll(
@@ -217,10 +219,18 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader', 'ui.xg.pager'])
                     );
                 }
             };
-
             $scope.isRowDisabled = function (row) {
                 return row[$scope.enableProp] === false || row[$scope.disableProp] === true;
-            }
+            };
+        };
+
+        this.syncSelectedRow = function () {
+            $scope.selectedRows = Object.entries($scope.selectedRowMap).reduce((res, [rowKey, selected]) => {
+                if (selected) {
+                    res.push($scope.allRowMap[rowKey]);
+                }
+                return res;
+            }, []);
         };
 
         this.initPageChangeHandler = function () {
@@ -257,6 +267,7 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader', 'ui.xg.pager'])
                 onSelect: '=?',
                 onSelectAll: '=?',
                 selectedRowMap: '=?',
+                selectedRows: '=?',
                 enableProp: '@?',
                 disableProp: '@?',
                 pages: '=?',
@@ -270,5 +281,3 @@ angular.module('ui.xg.table', ['ui.xg.tableLoader', 'ui.xg.pager'])
             }
         }
     });
-
-

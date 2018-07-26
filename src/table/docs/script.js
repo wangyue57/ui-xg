@@ -9,6 +9,8 @@ angular.module('uixDemo').controller('tableDemoCtrl', ['$scope', '$timeout', '$q
     // 一个对象，用于记录表格的选中情况， eg:
     // {rowId1: true, rowId2: false} 表示第一行被选中，第二行未选中，rowId1为设置的主键
     $scope.selectedRowMap = {};
+    // 一个list，包含所有选中的行数据，翻页后仍保留
+    $scope.selectedRows = [];
     // 表格主键，若表格主键不在表格中展示，可在此直接设置（因为性能原因，表格主键必须设置，在此处，或者在columns中
     $scope.primaryKey = 'id';
     // 表头数据
@@ -21,7 +23,7 @@ angular.module('uixDemo').controller('tableDemoCtrl', ['$scope', '$timeout', '$q
         title: `第${i + 1}列`,
         // 单元格数据加工函数， 第一个参数为此单元格原始数据，第二个参数为此行完整数据
         formatter(val, row) {
-            // 常用语对单元格数据做转换 eg:
+            // 常用于对单元格数据做转换 eg:
             // return val === 1? '真':'假';
 
             // 也可用于一个单元格展示多个属性的值， eg:
@@ -41,7 +43,7 @@ angular.module('uixDemo').controller('tableDemoCtrl', ['$scope', '$timeout', '$q
             },
             clickHandler(id, row) {
                 // 操作按钮事件函数，第一个参数为该行的主键值，常可设为单据id，第二个参数为此行完整数据
-                alert(`点击了第${id}行的删除按钮！${row.__selected ? '此行已选中！' : ''}`);
+                alert(`点击了第${id}行的删除按钮！${$scope.selectedRowMap[id] ? '此行已选中！' : ''}`);
             },
             icon: 'fa fa-delete',
             title: '删除'
@@ -51,7 +53,7 @@ angular.module('uixDemo').controller('tableDemoCtrl', ['$scope', '$timeout', '$q
                 return row.id % 3;
             },
             clickHandler(id, row) {
-                alert(`点击了第${id}行的添加按钮！${row.__selected ? '此行已选中！' : ''}`);
+                alert(`点击了第${id}行的添加按钮！${$scope.selectedRowMap[id] ? '此行已选中！' : ''}`);
             },
             icon: 'fa fa-add',
             title: '添加'
@@ -77,8 +79,7 @@ angular.module('uixDemo').controller('tableDemoCtrl', ['$scope', '$timeout', '$q
     };
 
     $scope.showAllSelected = function () {
-        const selectedRows = Object.keys($scope.selectedRowMap).filter(rowKey => $scope.selectedRowMap[rowKey]);
-        alert(selectedRows.length ? `当前已选中第${selectedRows.join('、')}行` : '当前没有选中行')
+        alert($scope.selectedRows.length ? `当前已选中第${$scope.selectedRows.map(row => row.id).join('、')}行` : '当前没有选中行')
     };
 
 
