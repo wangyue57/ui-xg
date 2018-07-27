@@ -15,6 +15,27 @@
   border-spacing: 0;
   border-collapse: collapse;
   background-color: #fff; }
+  .uix-table .loading-info div {
+    position: fixed;
+    left: 0; }
+  .uix-table .loading-info .loading {
+    width: 100%;
+    min-height: 450px; }
+  .uix-table .loading-info .loading-icon {
+    top: 45%;
+    left: 50%;
+    font-size: 30px;
+    margin-left: -15px;
+    position: absolute; }
+  .uix-table .loading-info .error-tip {
+    min-height: 450px; }
+  .uix-table .loading-info .error-text {
+    top: 50%;
+    left: 50%;
+    font-size: 30px;
+    margin-top: -30px;
+    margin-left: -90px;
+    position: absolute; }
   .uix-table tbody tr {
     line-height: 30px; }
   .uix-table tr:nth-of-type(odd) {

@@ -21,6 +21,8 @@ angular.module('uixDemo').controller('tableDemoCtrl', ['$scope', '$timeout', '$q
         name: 'col' + i,
         // 显示在表头的title
         title: `第${i + 1}列`,
+        // 可自定义添加class到该列的td上
+        className: i === 2 ? 'blue' : '',
         // 单元格数据加工函数， 第一个参数为此单元格原始数据，第二个参数为此行完整数据
         formatter(val, row) {
             // 常用于对单元格数据做转换 eg:

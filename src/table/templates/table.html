@@ -73,7 +73,9 @@
                                 <i></i>
                             </label>
                         </td>
-                        <td ng-repeat="col in columns track by col.name" ng-style="{width: widthRadio*col.width+'px'}">
+                        <td ng-repeat="col in columns track by col.name"
+                            ng-style="{width: widthRadio*col.width+'px'}"
+                            class="{{col.className}}">
                             <div ng-if="col.formatter"
                                  ng-bind-html="$sce.trustAsHtml(col.formatter(row[col.name], row))">
                             </div>
@@ -186,7 +188,8 @@
                             </label>
                         </td>
                         <td ng-repeat="col in preFixCols track by col.name"
-                            ng-style="{width: widthRadio*col.width+'px'}">
+                            ng-style="{width: widthRadio*col.width+'px'}"
+                            class="{{col.className}}">
                             <div ng-if="col.formatter"
                                  ng-bind-html="$sce.trustAsHtml(col.formatter(row[col.name], row))">
                             </div>
@@ -239,7 +242,8 @@
                     <tbody>
                     <tr ng-repeat="row in data track by row[primaryKey]">
                         <td ng-repeat="col in postFixCols track by col.name"
-                            ng-style="{width: widthRadio*col.width+'px'}">
+                            ng-style="{width: widthRadio*col.width+'px'}"
+                            class="{{col.className}}">
                             <div ng-bind-html="$sce.trustAsHtml(col.formatter(row[col.name], row))"
                                  ng-if="col.formatter"></div>
                             <div ng-if="!col.formatter">
