@@ -65,7 +65,7 @@ angular.module('ui.xg.table', ['ui.xg.pager'])
             }
 
             // 当固定表头时，必须设置表格高度
-            $scope.tableHeight = $scope.height || ($scope.fixHead ? 450 : NaN);
+            $scope.tableHeight = $scope.height || 450;
             // 当表格宽度小于父盒子宽度时，放大到表格宽度父盒子宽度
             $scope.tableWidth = Math.max($scope.parentWidth, totalWidth);
             $scope.widthRadio = $scope.tableWidth / totalWidth;

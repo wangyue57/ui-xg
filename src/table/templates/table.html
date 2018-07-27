@@ -1,8 +1,8 @@
 <div class="uix-table-box">
     <!-- ***************** 主表格 start ***************** -->
     <div class="uix-table-container uix-table-main">
-        <!-- ***************** 主表格 固定表头 start ***************** -->
-        <div class="uix-table-header-container" ng-show="fixHead" ng-style="{width:tableWidth+'px'}">
+        <!-- ***************** 主表格 表头 start ***************** -->
+        <div class="uix-table-header-container" ng-style="{width:tableWidth+'px'}">
             <table class="uix-table">
                 <thead>
                 <tr>
@@ -21,27 +21,12 @@
                 </thead>
             </table>
         </div>
-        <!-- ***************** 主表格 固定表头 end ***************** -->
+        <!-- ***************** 主表格 表头 end ***************** -->
 
         <!-- ***************** 主表格 表格体 start ***************** -->
-        <div class="uix-table-body-container" ng-style="{width:tableWidth+'px',height:tableHeight+(!fixHead&&36)+'px'}">
+        <div class="uix-table-body-container" ng-style="{width:tableWidth+'px',height:fixHead?tableHeight+'px':'auto'}">
             <div class="uix-table-body">
                 <table class="uix-table">
-                    <thead ng-show="!fixHead">
-                    <tr>
-                        <th ng-show="useSelect" class="text-center" ng-style="{width: 50*widthRadio+'px'}">
-                            <label ng-show="!single" class="i-checks">
-                                <input type="checkbox" ng-model="__allRowSelected"
-                                       ng-click="selectAllRow($event)">
-                                <i></i>
-                            </label>
-                        </th>
-                        <th ng-repeat="col in columns track by col.name" ng-style="{width: widthRadio*col.width+'px'}">
-                            {{col.title}}
-                        </th>
-                        <th ng-show="operations" ng-style="{width: 150*widthRadio+'px'}">操作</th>
-                    </tr>
-                    </thead>
                     <!-- 加载失败 -->
                     <tbody ng-show="tableLoader===-1" class="loading-info">
                     <tr>
@@ -127,9 +112,10 @@
 
     <!-- ***************** 前置冻结表格 start ***************** -->
     <div class="uix-table-container uix-table-pre-frozen"
-         ng-show="preFixCols&&tableLoader===0" ng-style="{width: widthRadio*preFixWidth+'px'}">
-        <!-- ***************** 前置冻结表格 固定表头 start ***************** -->
-        <div class="uix-table-header-container" ng-show="fixHead">
+         ng-style="{width: widthRadio*preFixWidth+'px'}"
+         ng-show="preFixCols&&tableLoader===0">
+        <!-- ***************** 前置冻结表格 表头 start ***************** -->
+        <div class="uix-table-header-container">
             <table class="uix-table">
                 <thead>
                 <tr>
@@ -147,27 +133,12 @@
                 </thead>
             </table>
         </div>
-        <!-- ***************** 前置冻结表格 固定表头 end ***************** -->
+        <!-- ***************** 前置冻结表格 表头 end ***************** -->
 
         <!-- ***************** 前置冻结表格 表格体 start ***************** -->
-        <div class="uix-table-body-container" ng-style="{height:tableHeight+(!fixHead&&36)+'px'}">
+        <div class="uix-table-body-container" ng-style="{height:fixHead?tableHeight+'px':'auto'}">
             <div class="uix-table-body">
                 <table class="uix-table">
-                    <thead ng-show="!fixHead">
-                    <tr>
-                        <th ng-show="useSelect" class="text-center" ng-style="{width: 50*widthRadio+'px'}">
-                            <label ng-show="!single" class="i-checks">
-                                <input type="checkbox" ng-model="__allRowSelected"
-                                       ng-click="selectAllRow($event)">
-                                <i></i>
-                            </label>
-                        </th>
-                        <th ng-repeat="col in preFixCols track by col.name"
-                            ng-style="{width: widthRadio*col.width+'px'}">
-                            {{col.title}}
-                        </th>
-                    </tr>
-                    </thead>
                     <tbody>
                     <tr ng-repeat="row in data track by row[primaryKey]">
                         <td ng-show="useSelect" class="text-center" ng-style="{width: 50*widthRadio+'px'}">
@@ -209,10 +180,11 @@
 
     <!-- ***************** 后置冻结表格 start ***************** -->
     <div class="uix-table-container uix-table-post-frozen"
-         ng-show="postFixCols&&tableLoader===0" ng-style="{width: widthRadio*postFixWidth+'px'}">
+         ng-style="{width: widthRadio*postFixWidth+'px'}"
+         ng-show="postFixCols&&tableLoader===0">
 
-        <!-- ***************** 后置冻结表格 固定表头 start ***************** -->
-        <div class="uix-table-header-container" ng-show="fixHead">
+        <!-- ***************** 后置冻结表格 表头 start ***************** -->
+        <div class="uix-table-header-container">
             <table class="uix-table">
                 <thead>
                 <tr>
@@ -224,21 +196,12 @@
                 </thead>
             </table>
         </div>
-        <!-- ***************** 后置冻结表格 固定表头 end ***************** -->
+        <!-- ***************** 后置冻结表格 表头 end ***************** -->
 
         <!-- ***************** 后置冻结表格 表格体 start ***************** -->
-        <div class="uix-table-body-container" ng-style="{height:tableHeight+(!fixHead&&36)+'px'}">
+        <div class="uix-table-body-container" ng-style="{height:fixHead?tableHeight+'px':'auto'}">
             <div class="uix-table-body">
                 <table class="uix-table">
-                    <thead ng-show="!fixHead">
-                    <tr>
-                        <th ng-repeat="col in postFixCols track by col.name"
-                            ng-style="{width: widthRadio*col.width+'px'}">
-                            {{col.title}}
-                        </th>
-                        <th ng-show="operations" ng-style="{width: 150*widthRadio+'px'}">操作</th>
-                    </tr>
-                    </thead>
                     <tbody>
                     <tr ng-repeat="row in data track by row[primaryKey]">
                         <td ng-repeat="col in postFixCols track by col.name"
@@ -269,6 +232,11 @@
     </div>
     <!-- ***************** 后置冻结表格 end ***************** -->
 
-    <uix-pager class="pull-right pagination-sm" total-items="pages.totalCount" ng-model="pages.pageNo"
-               items-per-page="pages.pageSize" ng-change="pageChangeHandler()"></uix-pager>
+    <uix-pager
+            class="pull-right pagination-sm"
+            ng-model="pages.pageNo"
+            total-items="pages.totalCount"
+            items-per-page="pages.pageSize"
+            ng-change="pageChangeHandler()">
+    </uix-pager>
 </div>
