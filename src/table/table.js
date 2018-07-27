@@ -4,11 +4,9 @@
  * Author: your_email@gmail.com
  * Date:2018-07-20
  */
-angular.module('ui.xg.table', ['ui.xg.pager'])
-    .controller('uixTableCtrl', ['$scope', '$timeout', '$sce', function ($scope, $timeout, $sce) {
+angular.module('ui.xg.table', ['ui.xg.simpleTable', 'ui.xg.pager'])
+    .controller('uixTableCtrl', ['$scope', '$timeout', function ($scope, $timeout) {
         this.init = function () {
-            // 安全相关，ng-bind-html需要
-            $scope.$sce = $sce;
             // 缓存多页数据
             $scope.allRowMap = {};
             // loader相关
@@ -41,9 +39,11 @@ angular.module('ui.xg.table', ['ui.xg.pager'])
                     $scope.allRowMap[row[$scope.primaryKey]] = row;
                 });
 
-                $scope.__allRowSelected = $scope.data.every(function (row) {
+                $scope.allRowSelected = $scope.data.every(function (row) {
                     return $scope.selectedRowMap[row[$scope.primaryKey]] || isRowDisabled(row);
                 });
+
+                $timeout(vm.syncFixTableTrHeight.bind(vm));
             });
             $scope.$watch('fixHead', vm.setTableSize.bind(vm));
             $scope.$watch('columns', vm.initFixTable.bind(vm), true);
@@ -56,16 +56,11 @@ angular.module('ui.xg.table', ['ui.xg.pager'])
         // 设置表格宽高，如果为固定表头，必须要设置高度
         this.setTableSize = function () {
             $scope.parentWidth = this.el.parentNode.offsetWidth;
-            var totalWidth = getTotalWidth($scope.columns);
-            if ($scope.operations) {
-                totalWidth += 150;
-            }
-            if ($scope.useSelect) {
-                totalWidth += 50;
-            }
+            var extraWidth = ($scope.operations ? 150 : 0) + ($scope.useSelect ? 50 : 0);
+            var totalWidth = getTotalWidth($scope.columns, extraWidth);
 
             // 当固定表头时，必须设置表格高度
-            $scope.tableHeight = $scope.height || 450;
+            $scope.tableHeight = $scope.height || 500;
             // 当表格宽度小于父盒子宽度时，放大到表格宽度父盒子宽度
             $scope.tableWidth = Math.max($scope.parentWidth, totalWidth);
             $scope.widthRadio = $scope.tableWidth / totalWidth;
@@ -96,100 +91,115 @@ angular.module('ui.xg.table', ['ui.xg.pager'])
             }
 
             if (preFixCols.length) {
-                var preFixWidth = getTotalWidth(preFixCols);
-                if ($scope.useSelect) {
-                    preFixWidth += 50;
-                }
-
+                var preFixWidth = getTotalWidth(preFixCols, $scope.useSelect ? 50 : 0);
                 $scope.preFixCols = preFixCols;
                 $scope.preFixWidth = preFixWidth;
-
-                $timeout(function () {
-                    var tableContainer = vm.el.querySelector('.uix-table-main .uix-table-body-container');
-                    var fixTableContainer = vm.el.querySelector('.uix-table-pre-frozen .uix-table-body-container');
-                    vm.syncFixTable(tableContainer, fixTableContainer);
-                });
             } else {
                 $scope.preFixCols = null;
             }
 
             if (postFixCols.length) {
-                var postFixWidth = getTotalWidth(postFixCols);
-                if ($scope.operations) {
-                    postFixWidth += 150;
-                }
-
+                var postFixWidth = getTotalWidth(postFixCols, $scope.operations ? 150 : 0);
                 $scope.postFixCols = postFixCols;
                 $scope.postFixWidth = postFixWidth;
-
-                $timeout(function () {
-                    var tableContainer = vm.el.querySelector('.uix-table-main .uix-table-body-container');
-                    var fixTableContainer = vm.el.querySelector('.uix-table-post-frozen .uix-table-body-container');
-                    vm.syncFixTable(tableContainer, fixTableContainer);
-                });
             } else {
                 $scope.postFixCols = null;
             }
 
             if (preFixCols.length || postFixCols.length) {
-                var mainContainer = vm.el.querySelector('.uix-table-main');
-                var preContainer = vm.el.querySelector('.uix-table-pre-frozen');
-                var postContainer = vm.el.querySelector('.uix-table-post-frozen');
-
-                angular.element(mainContainer).on('scroll', function () {
-                    if (mainContainer.scrollLeft > 0) {
-                        preContainer.classList.add('show-shadow');
-                    } else {
-                        preContainer.classList.remove('show-shadow');
-                    }
-
-                    if (mainContainer.scrollLeft < $scope.tableWidth - mainContainer.offsetWidth) {
-                        postContainer.classList.add('show-shadow');
-                    } else {
-                        postContainer.classList.remove('show-shadow');
-                    }
-                }).triggerHandler('scroll');
+                $timeout(() => {
+                    $scope.hasBindScroll || vm.syncFixTableScroll();
+                    vm.syncFixTableTrHeight();
+                });
             }
         };
 
-        // 冻结表格与主表格同步滚动 &  冻结表格与主表格tr设置为相同高度
-        this.syncFixTable = function (tableContainer, fixTableContainer) {
+        this.syncFixTableScroll = function () {
+            $scope.hasBindScroll = true;
+
+            var vm = this;
             var tableTimeStamp = null;
-            var fixTableTimeStamp = null;
+            var preFixTableTimeStamp = null;
+            var postFixTableTimeStamp = null;
+
+            var mainContainer = vm.el.querySelector('.uix-table-main');
+            var preContainer = vm.el.querySelector('.uix-table-pre-frozen');
+            var postContainer = vm.el.querySelector('.uix-table-post-frozen');
+            var tableContainer = vm.el.querySelector('.uix-table-main .uix-table-body');
+            var preFixTableContainer = vm.el.querySelector('.uix-table-pre-frozen .uix-table-body');
+            var postFixTableContainer = vm.el.querySelector('.uix-table-post-frozen .uix-table-body');
+
+            angular.element(mainContainer).on('scroll', function () {
+                if (mainContainer.scrollLeft > 0) {
+                    preContainer.classList.add('show-shadow');
+                } else {
+                    preContainer.classList.remove('show-shadow');
+                }
+
+                if (mainContainer.scrollLeft < $scope.tableWidth - mainContainer.offsetWidth) {
+                    postContainer.classList.add('show-shadow');
+                } else {
+                    postContainer.classList.remove('show-shadow');
+                }
+            }).triggerHandler('scroll');
 
             angular.element(tableContainer).on('scroll', function (event) {
-                if (event.timeStamp - fixTableTimeStamp < 100) {
+                if (event.timeStamp - preFixTableTimeStamp < 100 || event.timeStamp - postFixTableTimeStamp < 100) {
                     return;
                 }
 
                 tableTimeStamp = event.timeStamp;
-                fixTableContainer.scrollTop = tableContainer.scrollTop;
+                preFixTableContainer.scrollTop = tableContainer.scrollTop;
+                postFixTableContainer.scrollTop = tableContainer.scrollTop;
             }).triggerHandler('scroll');
 
-            angular.element(fixTableContainer).on('scroll', function (event) {
-                if (event.timeStamp - tableTimeStamp < 100) {
+            angular.element(preFixTableContainer).on('scroll', function (event) {
+                if (event.timeStamp - tableTimeStamp < 100 || event.timeStamp - postFixTableTimeStamp < 100) {
                     return;
                 }
 
-                fixTableTimeStamp = event.timeStamp;
-                tableContainer.scrollTop = fixTableContainer.scrollTop;
+                preFixTableTimeStamp = event.timeStamp;
+                tableContainer.scrollTop = preFixTableContainer.scrollTop;
+                postFixTableContainer.scrollTop = preFixTableContainer.scrollTop;
             });
 
-            var trs = tableContainer.querySelectorAll('tbody.main tr');
-            var fixTrs = fixTableContainer.querySelectorAll('tbody tr');
+            angular.element(preFixTableContainer).on('scroll', function (event) {
+                if (event.timeStamp - tableTimeStamp < 100 || event.timeStamp - preFixTableTimeStamp < 100) {
+                    return;
+                }
+
+                postFixTableTimeStamp = event.timeStamp;
+                tableContainer.scrollTop = postFixTableContainer.scrollTop;
+                preFixTableContainer.scrollTop = postFixTableContainer.scrollTop;
+            });
+        };
+
+        this.syncFixTableTrHeight = function () {
+            var trs = this.el.querySelectorAll('.uix-table-main tbody.main tr');
+            var preFixTrs = this.el.querySelectorAll('.uix-table-pre-frozen tbody.main tr');
+            var postFixTrs = this.el.querySelectorAll('.uix-table-post-frozen tbody.main tr');
+
             for (var i = 0; i < trs.length; i++) {
-                fixTrs[i].style.height = trs[i].offsetHeight + 'px';
+                var height = trs[i].offsetHeight + 'px';
+
+                if (preFixTrs[i]) {
+                    preFixTrs[i].style.height = height;
+                }
+
+                if (postFixTrs[i]) {
+                    postFixTrs[i].style.height = height;
+                }
             }
         };
 
         // 使用selectedRowMap设置表格选中逻辑
         this.initSelectAble = function () {
-            $scope.__allRowSelected = false;
+            $scope.allRowSelected = false;
             $scope.selectedRowMap = $scope.selectedRowMap || {};
             syncSelectedRow();
 
-            $scope.selectRow = function ($event, clickedRow) {
-                $scope.__allRowSelected = $scope.data.every(function (row) {
+            $scope.$on('selectRow', function (evt, originEvent, clickedRow) {
+                $scope.allRowSelected = $scope.data.every(function (row) {
                     return $scope.selectedRowMap[row[$scope.primaryKey]] || isRowDisabled(row);
                 });
                 syncSelectedRow();
@@ -197,37 +207,37 @@ angular.module('ui.xg.table', ['ui.xg.pager'])
                 if ($scope.onSelect) {
                     $scope.onSelect(
                         clickedRow[$scope.primaryKey],
-                        $event.target.checked,
+                        originEvent.target.checked,
                         getSelectedRowId(),
-                        $event
+                        originEvent
                     );
                 }
-            };
-            $scope.singleSelect = function ($event, clickedRow) {
+            });
+            $scope.$on('singleSelect', function (evt, originEvent, clickedRow) {
                 if ($scope.onSelect) {
                     $scope.onSelect(
                         clickedRow[$scope.primaryKey],
                         true,
                         [clickedRow[$scope.primaryKey]],
-                        $event
+                        originEvent
                     );
                 }
-            };
-            $scope.selectAllRow = function ($event) {
-                $scope.__allRowSelected = $event.target.checked;
+            });
+            $scope.$on('selectAllRow', function (evt, originEvent) {
+                $scope.allRowSelected = originEvent.target.checked;
                 angular.forEach($scope.data, function (row) {
-                    $scope.selectedRowMap[row[$scope.primaryKey]] = $event.target.checked && !isRowDisabled(row);
+                    $scope.selectedRowMap[row[$scope.primaryKey]] = originEvent.target.checked && !isRowDisabled(row);
                 });
                 syncSelectedRow();
 
                 if ($scope.onSelectAll) {
                     $scope.onSelectAll(
-                        $scope.__allRowSelected,
+                        $scope.allRowSelected,
                         getSelectedRowId(),
-                        $event
+                        originEvent
                     );
                 }
-            };
+            });
         };
 
         // wrap传入的pageChanged函数，封装tableLoader及防重
@@ -265,10 +275,10 @@ angular.module('ui.xg.table', ['ui.xg.pager'])
             });
         }
 
-        function getTotalWidth(columns) {
+        function getTotalWidth(columns, extra) {
             return columns.reduce(function (res, col) {
                 return res + col.width;
-            }, 0);
+            }, extra);
         }
     }])
     .directive('uixTable', function () {
