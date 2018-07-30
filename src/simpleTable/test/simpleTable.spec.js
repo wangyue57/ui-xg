@@ -1,10 +1,10 @@
-describe('ui.xg.simpleTable', function () {
+describe('ui.xg.simpletable', function () {
     var compile,
         scope;
 
     beforeEach(function () {
-        module('ui.xg.simpleTable');
-        module('simpleTable/templates/simpleTable.html');
+        module('ui.xg.simpletable');
+        module('simpletable/templates/simpletable.html');
         inject(function( $compile, $rootScope) {
             compile = $compile;
             scope = $rootScope.$new();

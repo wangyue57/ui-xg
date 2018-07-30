@@ -1,6 +1,6 @@
 <div class="uix-table-box">
     <!-- ***************** 主表格 start ***************** -->
-    <uix-simple-table
+    <uix-simpletable
             class="uix-table-main"
 
             data="data"
@@ -20,11 +20,11 @@
             parent-width="parentWidth"
             table-loader="tableLoader"
     >
-    </uix-simple-table>
+    </uix-simpletable>
     <!-- ***************** 主表格 end ***************** -->
 
     <!-- ***************** 前置冻结表格 start ***************** -->
-    <uix-simple-table
+    <uix-simpletable
             ng-show="preFixCols&&tableLoader===0"
             class="uix-table-pre-frozen"
 
@@ -43,11 +43,11 @@
             table-loader="tableLoader"
             table-width="widthRadio*preFixWidth"
     >
-    </uix-simple-table>
+    </uix-simpletable>
     <!-- ***************** 前置冻结表格 end ***************** -->
 
     <!-- ***************** 后置冻结表格 start ***************** -->
-    <uix-simple-table
+    <uix-simpletable
             ng-show="postFixCols&&tableLoader===0"
             class="uix-table-post-frozen"
 
@@ -63,13 +63,13 @@
             table-loader="tableLoader"
             table-width="widthRadio*postFixWidth"
     >
-    </uix-simple-table>
+    </uix-simpletable>
     <!-- ***************** 后置冻结表格 end ***************** -->
     <uix-pager
             class="pull-right pagination-sm"
             ng-model="pages.pageNo"
             total-items="pages.totalCount"
             items-per-page="pages.pageSize"
-            ng-change="pageChangeHandler()">
+            ng-change="pageChanged()">
     </uix-pager>
 </div>

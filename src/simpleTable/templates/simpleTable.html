@@ -14,7 +14,7 @@
                 <th ng-repeat="col in columns track by col.name" ng-style="{width: widthRadio*col.width+'px'}">
                     {{col.title}}
                 </th>
-                <th ng-show="operations" ng-style="{width: 150*widthRadio+'px'}">操作</th>
+                <th ng-show="operations" ng-style="{width: 200*widthRadio+'px'}">操作</th>
             </tr>
             </thead>
         </table>
@@ -62,17 +62,17 @@
                          ng-bind-html="$sce.trustAsHtml(col.formatter(row[col.name], row))">
                     </div>
                     <div ng-if="!col.formatter">
-                        row[col.name]
+                        {{row[col.name]}}
                     </div>
                 </td>
-                <td ng-show="operations" ng-style="{width: 150*widthRadio+'px'}">
+                <td ng-show="operations" ng-style="{width: 200*widthRadio+'px'}">
                     <button ng-repeat="opt in operations"
                             title="{{opt.title}}"
-                            ng-show="opt.showOpt(row)"
+                            ng-show="!opt.showOpt||opt.showOpt(row)"
                             ng-click="opt.clickHandler(row[primaryKey],row)"
                             class="btn btn-sm btn-default m-l-sm">
                         <i class="{{opt.icon}}"></i>
-                        {{opt.title}}
+                        {{opt.icon?'':opt.title}}
                     </button>
                 </td>
             </tr>

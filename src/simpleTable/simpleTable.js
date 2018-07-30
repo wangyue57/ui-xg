@@ -1,11 +1,11 @@
 /**
- * simpleTable
- * simpleTable directive
+ * simpletable
+ * simpletable directive
  * Author: your_email@gmail.com
  * Date:2018-07-27
  */
-angular.module('ui.xg.simpleTable', [])
-    .controller('uixSimpleTableCtrl', ['$scope', '$sce', function ($scope, $sce) {
+angular.module('ui.xg.simpletable', [])
+    .controller('uixSimpletableCtrl', ['$scope', '$sce', function ($scope, $sce) {
         $scope.$sce = $sce;
         $scope.selectAllRow = function ($event) {
             $scope.$emit('selectAllRow', $event);
@@ -20,12 +20,12 @@ angular.module('ui.xg.simpleTable', [])
             return row[$scope.enableProp] === false || row[$scope.disableProp] === true;
         }
     }])
-    .directive('uixSimpleTable', function () {
+    .directive('uixSimpletable', function () {
         return {
             restrict: 'E',
-            templateUrl: 'templates/simpleTable.html',
+            templateUrl: 'templates/simpletable.html',
             replace: true,
-            require: ['uixSimpleTable'],
+            require: ['uixSimpletable'],
             scope: {
                 data: '=',
                 columns: '=',
@@ -44,6 +44,6 @@ angular.module('ui.xg.simpleTable', [])
                 enableProp: '@?',
                 disableProp: '@?',
             },
-            controller: 'uixSimpleTableCtrl'
+            controller: 'uixSimpletableCtrl'
         }
     });

@@ -1,3 +1,3 @@
-angular.module('uixDemo').controller('simpleTableDemoCtrl',['$scope', function ($scope) {
+angular.module('uixDemo').controller('simpletableDemoCtrl',['$scope', function ($scope) {
     // your js code here
 }]);

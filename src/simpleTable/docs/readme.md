@@ -1,13 +1,13 @@
-# simpleTable
+# simpletable
 ## Description
 
-simpleTable directive.
+simpletable directive.
 
 ## Usage
 
 ``` html
-<uix-simpleTable>
-</uix-simpleTable>
+<uix-simpletable>
+</uix-simpletable>
 ```
 ## Restrict
 - 'E'

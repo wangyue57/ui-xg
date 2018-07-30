@@ -47,7 +47,6 @@ angular.module('uixDemo').controller('tableDemoCtrl', ['$scope', '$timeout', '$q
                 // 操作按钮事件函数，第一个参数为该行的主键值，常可设为单据id，第二个参数为此行完整数据
                 alert(`点击了第${id}行的删除按钮！${$scope.selectedRowMap[id] ? '此行已选中！' : ''}`);
             },
-            icon: 'fa fa-delete',
             title: '删除'
         },
         {
@@ -57,7 +56,6 @@ angular.module('uixDemo').controller('tableDemoCtrl', ['$scope', '$timeout', '$q
             clickHandler(id, row) {
                 alert(`点击了第${id}行的添加按钮！${$scope.selectedRowMap[id] ? '此行已选中！' : ''}`);
             },
-            icon: 'fa fa-add',
             title: '添加'
         },
 
@@ -84,7 +82,6 @@ angular.module('uixDemo').controller('tableDemoCtrl', ['$scope', '$timeout', '$q
         alert($scope.selectedRows.length ? `当前已选中第${$scope.selectedRows.map(row => row.id).join('、')}行` : '当前没有选中行')
     };
 
-
     // 刷新表格时，需先设置tableLoader = 1，重新获取数据成功后，设置tableLoader = 0，同uixTableLoader
     $scope.refresh = function () {
         $scope.pageChanged()
@@ -99,15 +96,19 @@ angular.module('uixDemo').controller('tableDemoCtrl', ['$scope', '$timeout', '$q
         $scope.columns[18].fix = $event.target.checked;
         $scope.columns[19].fix = $event.target.checked;
     };
+
+    // 同uixTableLoader
+    $scope.tableLoader = 1;
+    $timeout(() => $scope.tableLoader = 0, 1000);
+
     $scope.pages = {
         pageNo: 1,
         pageSize: 20,
         totalCount: 100
     };
+
     $scope.pageChanged = function () {
-        // 表格外的pageChange函数，只需要处理数据，然后resolve最后的tableLoader：-1 失败，0成功，2无数据
-        return $q(resolve => {
-            $timeout(() => resolve(2), 2000)
-        })
+        $scope.tableLoader = 1;
+        $timeout(() => $scope.tableLoader = 0, 100000);
     }
 }]);

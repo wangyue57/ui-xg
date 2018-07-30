@@ -4,26 +4,23 @@
  * Author: your_email@gmail.com
  * Date:2018-07-20
  */
-angular.module('ui.xg.table', ['ui.xg.simpleTable', 'ui.xg.pager'])
+angular.module('ui.xg.table', ['ui.xg.simpletable', 'ui.xg.pager'])
     .controller('uixTableCtrl', ['$scope', '$timeout', function ($scope, $timeout) {
         this.init = function () {
             // 缓存多页数据
             $scope.allRowMap = {};
-            // loader相关
-            $scope.tableLoader = 0;
 
             this.initWatch();
             this.processCols();
             this.setTableSize();
             this.initFixTable();
             this.initSelectAble();
-            this.initPageChangeHandler();
         };
 
         // columns预处理： 默认宽度，设置主键
         this.processCols = function () {
             angular.forEach($scope.columns, function (col) {
-                col.width = col.width || 150;
+                col.width = col.width || 200;
 
                 if (col.key) {
                     $scope.primaryKey = col.name;
@@ -45,18 +42,19 @@ angular.module('ui.xg.table', ['ui.xg.simpleTable', 'ui.xg.pager'])
 
                 $timeout(vm.syncFixTableTrHeight.bind(vm));
             });
-            $scope.$watch('fixHead', vm.setTableSize.bind(vm));
-            $scope.$watch('columns', vm.initFixTable.bind(vm), true);
             $scope.$watch('useSelect', function () {
                 vm.setTableSize();
                 vm.initFixTable();
             });
+            $scope.$watch('selectedRowMap', syncSelectedRow);
+            $scope.$watch('fixHead', vm.setTableSize.bind(vm));
+            $scope.$watch('columns', vm.initFixTable.bind(vm), true);
         };
 
         // 设置表格宽高，如果为固定表头，必须要设置高度
         this.setTableSize = function () {
-            $scope.parentWidth = this.el.parentNode.offsetWidth;
-            var extraWidth = ($scope.operations ? 150 : 0) + ($scope.useSelect ? 50 : 0);
+            $scope.parentWidth = this.el.parentNode.scrollWidth;
+            var extraWidth = ($scope.operations ? 200 : 0) + ($scope.useSelect ? 50 : 0);
             var totalWidth = getTotalWidth($scope.columns, extraWidth);
 
             // 当固定表头时，必须设置表格高度
@@ -99,7 +97,7 @@ angular.module('ui.xg.table', ['ui.xg.simpleTable', 'ui.xg.pager'])
             }
 
             if (postFixCols.length) {
-                var postFixWidth = getTotalWidth(postFixCols, $scope.operations ? 150 : 0);
+                var postFixWidth = getTotalWidth(postFixCols, $scope.operations ? 200 : 0);
                 $scope.postFixCols = postFixCols;
                 $scope.postFixWidth = postFixWidth;
             } else {
@@ -107,7 +105,7 @@ angular.module('ui.xg.table', ['ui.xg.simpleTable', 'ui.xg.pager'])
             }
 
             if (preFixCols.length || postFixCols.length) {
-                $timeout(() => {
+                $timeout(function () {
                     $scope.hasBindScroll || vm.syncFixTableScroll();
                     vm.syncFixTableTrHeight();
                 });
@@ -125,9 +123,9 @@ angular.module('ui.xg.table', ['ui.xg.simpleTable', 'ui.xg.pager'])
             var mainContainer = vm.el.querySelector('.uix-table-main');
             var preContainer = vm.el.querySelector('.uix-table-pre-frozen');
             var postContainer = vm.el.querySelector('.uix-table-post-frozen');
-            var tableContainer = vm.el.querySelector('.uix-table-main .uix-table-body');
-            var preFixTableContainer = vm.el.querySelector('.uix-table-pre-frozen .uix-table-body');
-            var postFixTableContainer = vm.el.querySelector('.uix-table-post-frozen .uix-table-body');
+            var tableContainer = mainContainer.querySelector('.uix-table-body');
+            var preFixTableContainer = preContainer.querySelector('.uix-table-body');
+            var postFixTableContainer = postContainer.querySelector('.uix-table-body');
 
             angular.element(mainContainer).on('scroll', function () {
                 if (mainContainer.scrollLeft > 0) {
@@ -163,7 +161,7 @@ angular.module('ui.xg.table', ['ui.xg.simpleTable', 'ui.xg.pager'])
                 postFixTableContainer.scrollTop = preFixTableContainer.scrollTop;
             });
 
-            angular.element(preFixTableContainer).on('scroll', function (event) {
+            angular.element(postFixTableContainer).on('scroll', function (event) {
                 if (event.timeStamp - tableTimeStamp < 100 || event.timeStamp - preFixTableTimeStamp < 100) {
                     return;
                 }
@@ -240,22 +238,6 @@ angular.module('ui.xg.table', ['ui.xg.simpleTable', 'ui.xg.pager'])
             });
         };
 
-        // wrap传入的pageChanged函数，封装tableLoader及防重
-        this.initPageChangeHandler = function () {
-            $scope.pageChangeHandler = function () {
-                if ($scope.tableLoader === 1) {
-                    return;
-                }
-
-                $scope.tableLoader = 1;
-                $scope.pageChanged().then(function (tableLoader) {
-                    $scope.tableLoader = tableLoader;
-                }, function () {
-                    $scope.tableLoader = -1;
-                });
-            };
-        };
-
         function isRowDisabled(row) {
             return row[$scope.enableProp] === false || row[$scope.disableProp] === true;
         }
@@ -286,6 +268,7 @@ angular.module('ui.xg.table', ['ui.xg.simpleTable', 'ui.xg.pager'])
             restrict: 'E',
             templateUrl: 'templates/table.html',
             require: ['uixTable'],
+            replace: true,
             scope: {
                 data: '=',
                 columns: '=',
@@ -299,6 +282,7 @@ angular.module('ui.xg.table', ['ui.xg.simpleTable', 'ui.xg.pager'])
                 onSelectAll: '=?',
                 selectedRowMap: '=?',
                 selectedRows: '=?',
+                tableLoader: '=?',
                 enableProp: '@?',
                 disableProp: '@?',
                 pages: '=?',
