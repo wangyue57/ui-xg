@@ -88,7 +88,7 @@ angular.module('ui.xg.table', ['ui.xg.simpletable', 'ui.xg.pager'])
                 }
             }
 
-            if (preFixCols.length) {
+            if (preFixCols.length || $scope.fixSelect) {
                 var preFixWidth = getTotalWidth(preFixCols, $scope.useSelect ? 50 : 0);
                 $scope.preFixCols = preFixCols;
                 $scope.preFixWidth = preFixWidth;
@@ -96,7 +96,7 @@ angular.module('ui.xg.table', ['ui.xg.simpletable', 'ui.xg.pager'])
                 $scope.preFixCols = null;
             }
 
-            if (postFixCols.length) {
+            if (postFixCols.length || $scope.fixOperate) {
                 var postFixWidth = getTotalWidth(postFixCols, $scope.operations ? 200 : 0);
                 $scope.postFixCols = postFixCols;
                 $scope.postFixWidth = postFixWidth;
@@ -104,7 +104,7 @@ angular.module('ui.xg.table', ['ui.xg.simpletable', 'ui.xg.pager'])
                 $scope.postFixCols = null;
             }
 
-            if (preFixCols.length || postFixCols.length) {
+            if ($scope.preFixCols || $scope.postFixCols) {
                 $timeout(function () {
                     $scope.hasBindScroll || vm.syncFixTableScroll();
                     vm.syncFixTableTrHeight();
@@ -276,6 +276,8 @@ angular.module('ui.xg.table', ['ui.xg.simpletable', 'ui.xg.pager'])
                 primaryKey: '=?',
                 operations: '=?',
                 fixHead: '=?',
+                fixSelect: '=?',
+                fixOperate: '=?',
                 useSelect: '=?',
                 single: '=?',
                 onSelect: '=?',
