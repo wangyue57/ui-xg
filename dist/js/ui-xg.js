@@ -1,6 +1,6 @@
 /*
  * ui-xg
- * Version: 2.1.8 - 2018-04-23
+ * Version: 2.1.10 - 2018-08-10
  * License: MIT
  */
 angular.module("ui.xg", ["ui.xg.tpls","ui.xg.transition","ui.xg.collapse","ui.xg.accordion","ui.xg.alert","ui.xg.button","ui.xg.buttonGroup","ui.xg.timepanel","ui.xg.calendar","ui.xg.carousel","ui.xg.position","ui.xg.stackedMap","ui.xg.tooltip","ui.xg.popover","ui.xg.dropdown","ui.xg.cityselect","ui.xg.datepicker","ui.xg.loader","ui.xg.modal","ui.xg.notify","ui.xg.pager","ui.xg.progressbar","ui.xg.rate","ui.xg.searchBox","ui.xg.select","ui.xg.sortable","ui.xg.step","ui.xg.steps","ui.xg.switch","ui.xg.tableLoader","ui.xg.tabs","ui.xg.timepicker","ui.xg.typeahead"]);
@@ -892,6 +892,7 @@ angular.module('ui.xg.calendar', ['ui.xg.timepanel'])
     .constant('uixCalendarConfig', {
         startingDay: 0, // 一周的开始天,0-周日,1-周一,以此类推
         showTime: true, // 是否显示时间选择
+        showSeconds: true, // 是否显示秒
         minDate: null, // 最小可选日期
         maxDate: null, // 最大可选日期
         exceptions: []  // 不可选日期中的例外,比如3月份的日期都不可选,但是3月15日却是可选择的
@@ -950,6 +951,10 @@ angular.module('ui.xg.calendar', ['ui.xg.timepanel'])
             });
             $scope.showTime = angular.isDefined($attrs.showTime)
                 ? $scope.$parent.$eval($attrs.showTime) : calendarConfig.showTime;
+
+            // 是否展示秒
+            $scope.showSeconds = angular.isDefined($attrs.showSeconds)
+                ? $scope.$parent.$eval($attrs.showSeconds) : calendarConfig.showSeconds;
 
 
             if (self.startingDay > 6 || self.startingDay < 0) {
@@ -3820,6 +3825,7 @@ angular.module('ui.xg.datepicker', ['ui.xg.calendar', 'ui.xg.popover'])
         autoClose: true, // 是否自动关闭面板,
         clearBtn: false,
         showTime: true,
+        showSeconds: true,
         size: 'md',
         appendToBody: false,
         placement: 'auto bottom-left'
@@ -3884,7 +3890,7 @@ angular.module('ui.xg.datepicker', ['ui.xg.calendar', 'ui.xg.popover'])
                     $scope.showCalendar = arguments.length ? !!open : !$scope.showCalendar;
                 };
 
-                angular.forEach(['exceptions', 'clearBtn', 'showTime', 'appendToBody', 'placement'], function (key) {
+                angular.forEach(['exceptions', 'clearBtn', 'showTime', 'appendToBody', 'placement', 'showSeconds'], function (key) {
                     $scope[key] = angular.isDefined($attrs[key])
                         ? angular.copy($scope.$parent.$eval($attrs[key])) : uixDatepickerConfig[key];
                 });
@@ -4501,6 +4507,8 @@ angular.module('ui.xg.modal', ['ui.xg.stackedMap', 'ui.xg.transition', 'ui.xg.bu
                 size: 'sm',
                 controller: ['$scope', '$uixModalInstance', function ($scope, $uixModalInstance) {
                     $scope.modalBodyText = opt.content || '';
+                    $scope.confirmBtnText = opt.confirmBtnText || '确定';
+                    $scope.cancelBtnText = opt.cancelBtnText || '取消';
                     var okCallback = opt.confirm ||
                         function () {
                             return true;
@@ -4535,7 +4543,9 @@ angular.module('ui.xg.modal', ['ui.xg.stackedMap', 'ui.xg.transition', 'ui.xg.bu
             scope: {
                 content: '@uixConfirm',
                 confirm: '&',
-                cancel: '&'
+                cancel: '&',
+                confirmBtnText: '@',
+                cancelBtnText: '@'
             },
             replace: true,
             link: function (scope, element, attrs) {
@@ -4543,6 +4553,8 @@ angular.module('ui.xg.modal', ['ui.xg.stackedMap', 'ui.xg.transition', 'ui.xg.bu
                 element.on('click', function () {
                     var modalInstance = $uixConfirm({
                         content: content,
+                        confirmBtnText: scope.confirmBtnText,
+                        cancelBtnText: scope.cancelBtnText,
                         confirm: function () {
                             return attrs.confirm ? scope.confirm({
                                 $modal: modalInstance
@@ -8582,7 +8594,7 @@ angular.module("calendar/templates/calendar.html",[]).run(["$templateCache",func
     "        </div>"+
     "    </div>"+
     "    <div class=\"uix-cal-panel-time\" ng-show=\"panels.time\"> <!--这里要用ng-show,不能用ng-if-->"+
-    "        <uix-timepanel min-time=\"minTime\" max-time=\"maxTime\" ng-model=\"selectDate\"></uix-timepanel>"+
+    "        <uix-timepanel min-time=\"minTime\" max-time=\"maxTime\" ng-model=\"selectDate\" show-seconds=\"showSeconds\"></uix-timepanel>"+
     "        <div class=\"btn-group clearfix\">"+
     "            <button class=\"btn btn-sm btn-default uix-cal-time-cancal\" ng-click=\"timePanelBack()\">返回</button>"+
     "            <button class=\"btn btn-sm btn-default uix-cal-time-now\" ng-click=\"timePanelSelectNow()\">此刻</button>"+
@@ -8806,7 +8818,15 @@ angular.module("cityselect/templates/citypanel.html",[]).run(["$templateCache",f
 }]);
 angular.module("datepicker/templates/datepicker-calendar.html",[]).run(["$templateCache",function($templateCache){
     $templateCache.put("templates/datepicker-calendar.html",
-    "<uix-calendar ng-model=\"selectDate\" on-change=\"changeDateHandler\" exceptions=\"exceptions\" min-date=\"minDate\" max-date=\"maxDate\" show-time=\"showTime\" date-filter=\"dateFilterProp($date)\">");
+    "<uix-calendar ng-model=\"selectDate\""+
+    "              on-change=\"changeDateHandler\""+
+    "              exceptions=\"exceptions\""+
+    "              min-date=\"minDate\""+
+    "              max-date=\"maxDate\""+
+    "              show-time=\"showTime\""+
+    "              show-seconds=\"showSeconds\""+
+    "              date-filter=\"dateFilterProp($date)\">"+
+    "</uix-calendar>");
 }]);
 angular.module("datepicker/templates/datepicker.html",[]).run(["$templateCache",function($templateCache){
     $templateCache.put("templates/datepicker.html",
@@ -8844,8 +8864,8 @@ angular.module("modal/templates/confirm.html",[]).run(["$templateCache",function
     "<!-- 公共的confirmModal -->"+
     "<div class=\"modal-body\" ng-bind=\"modalBodyText\"></div>"+
     "<div class=\"modal-footer\">"+
-    "    <uix-button class=\"btn btn-primary btn-sm\" b-type=\"button\" ng-click=\"ok()\" loading=\"loading\" ng-disabled=\"loading\">确定</uix-button>"+
-    "    <button class=\"btn btn-default btn-sm\" ng-click=\"cancel()\">取消</button>"+
+    "    <uix-button class=\"btn btn-primary btn-sm\" b-type=\"button\" ng-click=\"ok()\" loading=\"loading\" ng-disabled=\"loading\">{{confirmBtnText}}</uix-button>"+
+    "    <button class=\"btn btn-default btn-sm\" ng-click=\"cancel()\">{{cancelBtnText}}</button>"+
     "</div>"+
     "");
 }]);
