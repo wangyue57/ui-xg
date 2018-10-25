@@ -5,8 +5,9 @@
  * Date:2018-07-20
  */
 angular.module('ui.xg.table', ['ui.xg.pager'])
-    .controller('uixTableCtrl', ['$scope', '$timeout', function ($scope, $timeout) {
+    .controller('uixTableCtrl', ['$sce', '$scope', '$timeout', function ($sce, $scope, $timeout) {
         this.init = function () {
+            $scope.$sce = $sce;
             $scope.selectRow = selectRow;
             $scope.selectAllRow = selectAllRow;
             $scope.singleSelect = singleSelect;
