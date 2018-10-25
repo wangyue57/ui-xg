@@ -1,69 +1,257 @@
 <div class="uix-table-box">
     <!-- ***************** 主表格 start ***************** -->
-    <uix-simpletable
-            class="uix-table-main"
+    <div class="uix-table-container uix-table-main">
+        <!-- *****************  表头 start ***************** -->
+        <div class="uix-table-header" ng-style="{width:tableWidth+'px'}" ng-if="fixHead">
+            <table class="uix-table">
+                <thead>
+                <tr>
+                    <th ng-if="selectable" class="text-center" ng-style="{width: 50*widthRadio+'px'}">
+                        <label ng-if="!single" class="i-checks">
+                            <input type="checkbox" ng-model="allRowSelected" ng-click="selectAllRow($event)">
+                            <i></i>
+                        </label>
+                    </th>
+                    <th ng-repeat="col in columns track by col.name" ng-style="{width: widthRadio*col.width+'px'}">
+                        {{col.title}}
+                    </th>
+                    <th ng-if="operations" ng-style="{width: 200*widthRadio+'px'}">操作</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+        <!-- *****************  表头 end ***************** -->
 
-            data="data"
-            columns="columns"
-            primary-key="primaryKey"
+        <!-- *****************  表格体 start ***************** -->
+        <div class="uix-table-body" ng-style="{width:tableWidth+'px',height:fixHead?tableHeight+'px':'auto'}">
+            <table class="uix-table">
+                <!-- 加载失败 -->
+                <tbody ng-show="tableLoader===-1" class="loading-info">
+                <tr>
+                    <td colspan="100%">
+                        <div class="error-tip" ng-style="{width: parentWidth+'px'}">
+                            <span class="error-text">数据加载失败! </span>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
 
-            single="single"
-            fix-head="fixHead"
-            use-select="useSelect"
-            operations="operations"
-            selected-row-map="selectedRowMap"
-            all-row-selected="allRowSelected"
+                <!-- 数据 -->
+                <tbody ng-show="tableLoader===0" class="main">
+                <tr ng-repeat="row in data track by row[primaryKey]">
+                    <td ng-if="selectable" class="text-center" ng-style="{width: 50*widthRadio+'px'}">
+                        <label class="i-checks" ng-if="!single">
+                            <input type="checkbox"
+                                   ng-model="selectedRowMap[row[primaryKey]]"
+                                   ng-disabled="isRowDisabled(row)"
+                                   ng-click="selectRow($event, row)">
+                            <i></i>
+                        </label>
+                        <label class="i-checks" ng-if="single">
+                            <input type="radio"
+                                   name="selectRow"
+                                   ng-value="row[primaryKey]"
+                                   ng-click="singleSelect($event,row)"
+                                   ng-disabled="isRowDisabled(row)">
+                            <i></i>
+                        </label>
+                    </td>
+                    <td ng-repeat="col in columns track by col.name"
+                        ng-style="{width: widthRadio*col.width+'px'}"
+                        class="{{col.className}}">
+                        <div ng-if="col.formatter"
+                             ng-bind-html="$sce.trustAsHtml(col.formatter(row[col.name], row))">
+                        </div>
+                        <div ng-if="!col.formatter">
+                            {{row[col.name]}}
+                        </div>
+                    </td>
+                    <td ng-if="operations" ng-style="{width: 200*widthRadio+'px'}">
+                        <button ng-repeat="opt in operations"
+                                title="{{opt.title}}"
+                                ng-show="!opt.showOpt||opt.showOpt(row)"
+                                ng-click="opt.clickHandler(row[primaryKey],row)"
+                                class="btn btn-sm btn-default m-l-sm">
+                            <i class="{{opt.icon}}"></i>
+                            {{opt.icon?'':opt.title}}
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
 
-            width-radio="widthRadio"
-            table-width="tableWidth"
-            table-height="tableHeight"
-            parent-width="parentWidth"
-            table-loader="tableLoader"
-    >
-    </uix-simpletable>
+                <!-- 加载中 -->
+                <tbody ng-show="tableLoader===1" class="loading-info">
+                <tr>
+                    <td colspan="100%">
+                        <div class="loading" ng-style="{width: parentWidth+'px'}">
+                            <i class="fa fa-spin fa-spinner loading-icon"></i>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+
+                <!-- 无数据 -->
+                <tbody ng-show="tableLoader===2" class="loading-info">
+                <tr>
+                    <td colspan="100%">
+                        <div class="error-tip" ng-style="{width: parentWidth+'px'}">
+                            <span class="error-text">数据列表为空! </span>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <!-- *****************  表格体 end ***************** -->
+    </div>
     <!-- ***************** 主表格 end ***************** -->
 
     <!-- ***************** 前置冻结表格 start ***************** -->
-    <uix-simpletable
-            ng-show="preFixCols&&tableLoader===0"
-            class="uix-table-pre-frozen"
+    <div class="uix-table-container uix-table-pre-frozen" ng-if="preFixCols" ng-show="tableLoader===0">
+        <!-- *****************  表头 start ***************** -->
+        <div class="uix-table-header" ng-style="{width:tableWidth+'px'}">
+            <table class="uix-table">
+                <thead>
+                <tr>
+                    <th ng-if="selectable" class="text-center" ng-style="{width: 50*widthRadio+'px'}">
+                        <label ng-if="!single" class="i-checks">
+                            <input type="checkbox" ng-model="allRowSelected"
+                                   ng-click="selectAllRow($event)">
+                            <i></i>
+                        </label>
+                    </th>
+                    <th ng-repeat="col in columns track by col.name" ng-style="{width: widthRadio*col.width+'px'}">
+                        {{col.title}}
+                    </th>
+                    <th ng-if="operations" ng-style="{width: 200*widthRadio+'px'}">操作</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+        <!-- *****************  表头 end ***************** -->
 
-            data="data"
-            columns="preFixCols"
-            primary-key="primaryKey"
-
-            single="single"
-            fix-head="fixHead"
-            use-select="useSelect"
-            selected-row-map="selectedRowMap"
-            all-row-selected="allRowSelected"
-
-            width-radio="widthRadio"
-            table-height="tableHeight"
-            table-loader="tableLoader"
-            table-width="widthRadio*preFixWidth"
-    >
-    </uix-simpletable>
+        <!-- *****************  表格体 start ***************** -->
+        <div class="uix-table-body" ng-style="{width:tableWidth+'px',height:fixHead?tableHeight+'px':'auto'}">
+            <table class="uix-table">
+                <tbody class="main">
+                <tr ng-repeat="row in data track by row[primaryKey]">
+                    <td ng-if="selectable" class="text-center" ng-style="{width: 50*widthRadio+'px'}">
+                        <label class="i-checks" ng-if="!single">
+                            <input type="checkbox"
+                                   ng-model="selectedRowMap[row[primaryKey]]"
+                                   ng-disabled="isRowDisabled(row)"
+                                   ng-click="selectRow($event, row)">
+                            <i></i>
+                        </label>
+                        <label class="i-checks" ng-if="single">
+                            <input type="radio"
+                                   name="selectRow"
+                                   ng-value="row[primaryKey]"
+                                   ng-click="singleSelect($event,row)"
+                                   ng-disabled="isRowDisabled(row)">
+                            <i></i>
+                        </label>
+                    </td>
+                    <td ng-repeat="col in columns track by col.name"
+                        ng-style="{width: widthRadio*col.width+'px'}"
+                        class="{{col.className}}">
+                        <div ng-if="col.formatter"
+                             ng-bind-html="$sce.trustAsHtml(col.formatter(row[col.name], row))">
+                        </div>
+                        <div ng-if="!col.formatter">
+                            {{row[col.name]}}
+                        </div>
+                    </td>
+                    <td ng-if="operations" ng-style="{width: 200*widthRadio+'px'}">
+                        <button ng-repeat="opt in operations"
+                                title="{{opt.title}}"
+                                ng-show="!opt.showOpt||opt.showOpt(row)"
+                                ng-click="opt.clickHandler(row[primaryKey],row)"
+                                class="btn btn-sm btn-default m-l-sm">
+                            <i class="{{opt.icon}}"></i>
+                            {{opt.icon?'':opt.title}}
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <!-- *****************  表格体 end ***************** -->
+    </div>
     <!-- ***************** 前置冻结表格 end ***************** -->
 
     <!-- ***************** 后置冻结表格 start ***************** -->
-    <uix-simpletable
-            ng-show="postFixCols&&tableLoader===0"
-            class="uix-table-post-frozen"
+    <div class="uix-table-container uix-table-post-frozen" ng-if="postFixCols" ng-show="tableLoader===0">
+        <!-- *****************  表头 start ***************** -->
+        <div class="uix-table-header" ng-style="{width:tableWidth+'px'}">
+            <table class="uix-table">
+                <thead>
+                <tr>
+                    <th ng-if="selectable" class="text-center" ng-style="{width: 50*widthRadio+'px'}">
+                        <label ng-if="!single" class="i-checks">
+                            <input type="checkbox" ng-model="allRowSelected"
+                                   ng-click="selectAllRow($event)">
+                            <i></i>
+                        </label>
+                    </th>
+                    <th ng-repeat="col in columns track by col.name" ng-style="{width: widthRadio*col.width+'px'}">
+                        {{col.title}}
+                    </th>
+                    <th ng-if="operations" ng-style="{width: 200*widthRadio+'px'}">操作</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+        <!-- *****************  表头 end ***************** -->
 
-            data="data"
-            columns="postFixCols"
-            primary-key="primaryKey"
-
-            fix-head="fixHead"
-            operations="operations"
-
-            width-radio="widthRadio"
-            table-height="tableHeight"
-            table-loader="tableLoader"
-            table-width="widthRadio*postFixWidth"
-    >
-    </uix-simpletable>
+        <!-- *****************  表格体 start ***************** -->
+        <div class="uix-table-body" ng-style="{width:tableWidth+'px',height:fixHead?tableHeight+'px':'auto'}">
+            <table class="uix-table">
+                <tbody class="main">
+                <tr ng-repeat="row in data track by row[primaryKey]">
+                    <td ng-if="selectable" class="text-center" ng-style="{width: 50*widthRadio+'px'}">
+                        <label class="i-checks" ng-if="!single">
+                            <input type="checkbox"
+                                   ng-model="selectedRowMap[row[primaryKey]]"
+                                   ng-disabled="isRowDisabled(row)"
+                                   ng-click="selectRow($event, row)">
+                            <i></i>
+                        </label>
+                        <label class="i-checks" ng-if="single">
+                            <input type="radio"
+                                   name="selectRow"
+                                   ng-value="row[primaryKey]"
+                                   ng-click="singleSelect($event,row)"
+                                   ng-disabled="isRowDisabled(row)">
+                            <i></i>
+                        </label>
+                    </td>
+                    <td ng-repeat="col in columns track by col.name"
+                        ng-style="{width: widthRadio*col.width+'px'}"
+                        class="{{col.className}}">
+                        <div ng-if="col.formatter"
+                             ng-bind-html="$sce.trustAsHtml(col.formatter(row[col.name], row))">
+                        </div>
+                        <div ng-if="!col.formatter">
+                            {{row[col.name]}}
+                        </div>
+                    </td>
+                    <td ng-if="operations" ng-style="{width: 200*widthRadio+'px'}">
+                        <button ng-repeat="opt in operations"
+                                title="{{opt.title}}"
+                                ng-show="!opt.showOpt||opt.showOpt(row)"
+                                ng-click="opt.clickHandler(row[primaryKey],row)"
+                                class="btn btn-sm btn-default m-l-sm">
+                            <i class="{{opt.icon}}"></i>
+                            {{opt.icon?'':opt.title}}
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <!-- *****************  表格体 end ***************** -->
+    </div>
     <!-- ***************** 后置冻结表格 end ***************** -->
     <uix-pager
             class="pull-right pagination-sm"

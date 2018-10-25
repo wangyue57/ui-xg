@@ -6,46 +6,25 @@
         }
     </style>
     <button ng-click="refresh()">刷新数据</button>
-    <button ng-click="showAllSelected()">展示所有选中行</button>
-    <label>
-        <input type="checkbox" ng-model="useSelect">
-        表格可选
-    </label>
-    <label>
-        <input type="checkbox" ng-model="single">
-        单选
-    </label>
-    <label>
-        <input type="checkbox" ng-model="fixHead">
-        固定表头
-    </label>
-    <label>
-        <input type="checkbox" ng-click="fixPre($event)">
-        冻结前两列
-    </label>
-    <label>
-        <input type="checkbox" ng-click="fixPost($event)">
-        冻结后两列
-    </label>
 
-    <div ng-show="useSelect">
-        {{selectActionText}}
-    </div>
+    <div>{{selectActionText}}</div>
+    <div>已经选中的行：{{slectedText}}</div>
 
     <uix-table
             data="data"
             columns="columns"
             operations="operations"
-            use-select="useSelect"
+            primary-key="primaryKey"
+            record-multi-page="recordMultiPage"
+            fix-head="fixHead"
+            selectable="selectable"
             single="single"
             on-select="onSelect"
             on-select-all="onSelectAll"
-            selected-row-map="selectedRowMap"
             selected-rows="selectedRows"
-            primary-key="primaryKey"
-            fix-head="fixHead"
-            page-changed="pageChanged"
+            selected-row-map="selectedRowMap"
             pages="pages"
+            page-changed="pageChanged"
             table-loader="tableLoader">
     </uix-table>
 </div>
