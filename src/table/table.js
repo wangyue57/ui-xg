@@ -85,10 +85,7 @@ angular.module('ui.xg.table', ['ui.xg.pager'])
             }
 
             if ($scope.preFixCols || $scope.postFixCols) {
-                $timeout(() => {
-                    this.syncFixTableScroll();
-                    this.syncFixTableTrHeight();
-                });
+                $timeout(this.syncFixTableScroll.bind(this));
             }
         };
 
@@ -158,7 +155,7 @@ angular.module('ui.xg.table', ['ui.xg.pager'])
 
             for (let i = 0; i < trs.length; i++) {
                 const height = trs[i].offsetHeight + 'px';
-
+                console.log(height);
                 if (preFixTrs[i]) {
                     preFixTrs[i].style.height = height;
                 }
@@ -169,11 +166,12 @@ angular.module('ui.xg.table', ['ui.xg.pager'])
             }
         };
 
-        // columns预处理： 默认宽度，设置主键
+        // columns预处理： 默认宽度，默认formatter，设置主键
         function processCols() {
             for (let i = 0, len = $scope.columns.length; i < len; i++) {
                 const col = $scope.columns[i];
                 col.width = col.width || 200;
+                col.formatter = col.formatter || pipe;
 
                 if (col.key) {
                     $scope.primaryKey = col.name;
@@ -187,7 +185,9 @@ angular.module('ui.xg.table', ['ui.xg.pager'])
             syncAllRowSelected();
 
             if ($scope.onSelect) {
-                $scope.onSelect(row, row[$scope.primaryKey], $event.target.checked);
+                $timeout(() => {
+                    $scope.onSelect(row, row[$scope.primaryKey], $event.target.checked);
+                });
             }
         }
 
@@ -200,14 +200,18 @@ angular.module('ui.xg.table', ['ui.xg.pager'])
             syncSelectedRow();
 
             if ($scope.onSelectAll) {
-                $scope.onSelectAll($scope.allRowSelected);
+                $timeout(() => {
+                    $scope.onSelectAll($scope.allRowSelected);
+                });
             }
         }
 
         // 点击行单选，触发钩子
         function singleSelect($event, row) {
             if ($scope.onSelect) {
-                $scope.onSelect(row, row[$scope.primaryKey], true);
+                $timeout(() => {
+                    $scope.onSelect(row, row[$scope.primaryKey], true);
+                });
             }
         }
 
@@ -244,6 +248,10 @@ angular.module('ui.xg.table', ['ui.xg.pager'])
         // 获取表格总宽度
         function getTotalWidth(columns, extra) {
             return columns.reduce((res, col) => res + col.width, extra);
+        }
+
+        function pipe(val) {
+            return val;
         }
     }])
     .directive('uixTable', function () {

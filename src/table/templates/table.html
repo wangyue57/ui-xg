@@ -59,11 +59,11 @@
                     <td ng-repeat="col in columns track by col.name"
                         ng-style="{width: widthRadio*col.width+'px'}"
                         class="{{col.className}}">
-                        <div ng-if="col.formatter"
+                        <div ng-if="col.renderAsHtml"
                              ng-bind-html="$sce.trustAsHtml(col.formatter(row[col.name], row))">
                         </div>
-                        <div ng-if="!col.formatter">
-                            {{row[col.name]}}
+                        <div ng-if="!col.renderAsHtml">
+                            {{col.formatter(row[col.name], row)}}
                         </div>
                     </td>
                     <td ng-if="operations" ng-style="{width: 200*widthRadio+'px'}">
@@ -109,7 +109,7 @@
     <!-- ***************** 前置冻结表格 start ***************** -->
     <div class="uix-table-container uix-table-pre-frozen" ng-if="preFixCols" ng-show="tableLoader===0">
         <!-- *****************  表头 start ***************** -->
-        <div class="uix-table-header" ng-style="{width:tableWidth+'px'}">
+        <div class="uix-table-header" ng-style="{width:preFixWidth+'px'}">
             <table class="uix-table">
                 <thead>
                 <tr>
@@ -120,10 +120,9 @@
                             <i></i>
                         </label>
                     </th>
-                    <th ng-repeat="col in columns track by col.name" ng-style="{width: widthRadio*col.width+'px'}">
+                    <th ng-repeat="col in preFixCols track by col.name" ng-style="{width: widthRadio*col.width+'px'}">
                         {{col.title}}
                     </th>
-                    <th ng-if="operations" ng-style="{width: 200*widthRadio+'px'}">操作</th>
                 </tr>
                 </thead>
             </table>
@@ -131,7 +130,7 @@
         <!-- *****************  表头 end ***************** -->
 
         <!-- *****************  表格体 start ***************** -->
-        <div class="uix-table-body" ng-style="{width:tableWidth+'px',height:fixHead?tableHeight+'px':'auto'}">
+        <div class="uix-table-body" ng-style="{width:preFixWidth+'px',height:fixHead?tableHeight+'px':'auto'}">
             <table class="uix-table">
                 <tbody class="main">
                 <tr ng-repeat="row in data track by row[primaryKey]">
@@ -152,25 +151,15 @@
                             <i></i>
                         </label>
                     </td>
-                    <td ng-repeat="col in columns track by col.name"
+                    <td ng-repeat="col in preFixCols track by col.name"
                         ng-style="{width: widthRadio*col.width+'px'}"
                         class="{{col.className}}">
-                        <div ng-if="col.formatter"
+                        <div ng-if="col.renderAsHtml"
                              ng-bind-html="$sce.trustAsHtml(col.formatter(row[col.name], row))">
                         </div>
-                        <div ng-if="!col.formatter">
-                            {{row[col.name]}}
+                        <div ng-if="!col.renderAsHtml">
+                            {{col.formatter(row[col.name], row)}}
                         </div>
-                    </td>
-                    <td ng-if="operations" ng-style="{width: 200*widthRadio+'px'}">
-                        <button ng-repeat="opt in operations"
-                                title="{{opt.title}}"
-                                ng-show="!opt.showOpt||opt.showOpt(row)"
-                                ng-click="opt.clickHandler(row[primaryKey],row)"
-                                class="btn btn-sm btn-default m-l-sm">
-                            <i class="{{opt.icon}}"></i>
-                            {{opt.icon?'':opt.title}}
-                        </button>
                     </td>
                 </tr>
                 </tbody>
@@ -183,18 +172,11 @@
     <!-- ***************** 后置冻结表格 start ***************** -->
     <div class="uix-table-container uix-table-post-frozen" ng-if="postFixCols" ng-show="tableLoader===0">
         <!-- *****************  表头 start ***************** -->
-        <div class="uix-table-header" ng-style="{width:tableWidth+'px'}">
+        <div class="uix-table-header" ng-style="{width:postFixWidth+'px'}">
             <table class="uix-table">
                 <thead>
                 <tr>
-                    <th ng-if="selectable" class="text-center" ng-style="{width: 50*widthRadio+'px'}">
-                        <label ng-if="!single" class="i-checks">
-                            <input type="checkbox" ng-model="allRowSelected"
-                                   ng-click="selectAllRow($event)">
-                            <i></i>
-                        </label>
-                    </th>
-                    <th ng-repeat="col in columns track by col.name" ng-style="{width: widthRadio*col.width+'px'}">
+                    <th ng-repeat="col in postFixCols track by col.name" ng-style="{width: widthRadio*col.width+'px'}">
                         {{col.title}}
                     </th>
                     <th ng-if="operations" ng-style="{width: 200*widthRadio+'px'}">操作</th>
@@ -205,35 +187,18 @@
         <!-- *****************  表头 end ***************** -->
 
         <!-- *****************  表格体 start ***************** -->
-        <div class="uix-table-body" ng-style="{width:tableWidth+'px',height:fixHead?tableHeight+'px':'auto'}">
+        <div class="uix-table-body" ng-style="{width:postFixWidth+'px',height:fixHead?tableHeight+'px':'auto'}">
             <table class="uix-table">
                 <tbody class="main">
                 <tr ng-repeat="row in data track by row[primaryKey]">
-                    <td ng-if="selectable" class="text-center" ng-style="{width: 50*widthRadio+'px'}">
-                        <label class="i-checks" ng-if="!single">
-                            <input type="checkbox"
-                                   ng-model="selectedRowMap[row[primaryKey]]"
-                                   ng-disabled="isRowDisabled(row)"
-                                   ng-click="selectRow($event, row)">
-                            <i></i>
-                        </label>
-                        <label class="i-checks" ng-if="single">
-                            <input type="radio"
-                                   name="selectRow"
-                                   ng-value="row[primaryKey]"
-                                   ng-click="singleSelect($event,row)"
-                                   ng-disabled="isRowDisabled(row)">
-                            <i></i>
-                        </label>
-                    </td>
-                    <td ng-repeat="col in columns track by col.name"
+                    <td ng-repeat="col in postFixCols track by col.name"
                         ng-style="{width: widthRadio*col.width+'px'}"
                         class="{{col.className}}">
-                        <div ng-if="col.formatter"
+                        <div ng-if="col.renderAsHtml"
                              ng-bind-html="$sce.trustAsHtml(col.formatter(row[col.name], row))">
                         </div>
-                        <div ng-if="!col.formatter">
-                            {{row[col.name]}}
+                        <div ng-if="!col.renderAsHtml">
+                            {{col.formatter(row[col.name], row)}}
                         </div>
                     </td>
                     <td ng-if="operations" ng-style="{width: 200*widthRadio+'px'}">

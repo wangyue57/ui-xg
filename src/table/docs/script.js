@@ -25,6 +25,8 @@ angular.module('uixDemo').controller('tableDemoCtrl', ['$scope', '$timeout', '$q
         name: 'col' + i,
         // 显示在表头的title
         title: `第${i + 1}列`,
+        // 是否按html渲染
+        renderAsHtml: true,
         // 可自定义添加class到该列的td上
         className: i === 2 ? 'blue' : '',
         // 单元格数据加工函数， 第一个参数为此单元格原始数据，第二个参数为此行完整数据
@@ -69,7 +71,7 @@ angular.module('uixDemo').controller('tableDemoCtrl', ['$scope', '$timeout', '$q
     $scope.data = [...Array(100).keys()].map(i => {
         const val = {id: i + 1};
         angular.forEach($scope.columns, (col, j) => {
-            val[col.name] = `第${i + 1}行第${j + 1}列的内容`
+            val[col.name] = `第${i + 1}行第${j + 1}列的内容` + (j === 10 ? '电路设计斐林试剂快递费了空间撒；李稻葵放假啊；离开圣诞节福利；奥斯卡建档立卡副科级' : '')
         });
         return val;
     });
@@ -104,6 +106,6 @@ angular.module('uixDemo').controller('tableDemoCtrl', ['$scope', '$timeout', '$q
 
     $scope.pageChanged = function () {
         $scope.tableLoader = 1;
-        $timeout(() => $scope.tableLoader = 0, 100000);
+        $timeout(() => $scope.tableLoader = 0, 1000);
     }
 }]);

@@ -42,6 +42,129 @@
   }
 }
 
+.uix-table-container {
+  overflow-x: scroll;
+}
+
+.uix-table-header {
+  .uix-table {
+    > thead > tr > th {
+      border-bottom: 1px solid #eaeff0;
+    }
+  }
+}
+
+.uix-table-body {
+  overflow-y: scroll;
+}
+
+.uix-table {
+  width: 100%;
+  max-width: 100%;
+  font-size: 13px;
+  border-spacing: 0;
+  border-collapse: collapse;
+  background-color: #fff;
+
+  .loading-info {
+    div {
+      position: relative;
+      left: 0;
+    }
+    .loading {
+      width: 100%;
+      min-height: 450px;
+    }
+    .loading-icon {
+      top: 45%;
+      left: 50%;
+      font-size: 30px;
+      margin-left: -15px;
+      position: absolute;
+    }
+    .error-tip {
+      min-height: 450px;
+    }
+    .error-text {
+      top: 50%;
+      left: 50%;
+      font-size: 30px;
+      margin-top: -30px;
+      margin-left: -90px;
+      position: absolute;
+    }
+  }
+
+  tbody tr {
+    line-height: 30px;
+  }
+
+  tr:nth-of-type(odd) {
+    background-color: #fafbfc;
+  }
+
+  th, td {
+    padding: 8px 15px;
+    text-align: left;
+    vertical-align: top;
+    border-top: 1px solid #eaeff0;
+    &.text-center {
+      text-align: center;
+    }
+    &.text-right {
+      text-align: right;
+    }
+  }
+
+  // Bottom align for column headings
+  > thead > tr > th {
+    vertical-align: bottom;
+    border-bottom: 2px solid #eaeff0;
+  }
+
+  // Remove top border from thead by default
+  > caption + thead,
+  > colgroup + thead,
+  > thead:first-child {
+    > tr:first-child {
+      > th,
+      > td {
+        border-top: 0;
+      }
+    }
+  }
+
+  .btn {
+    outline: none;
+    font-weight: 500;
+    border-radius: 2px;
+    color: #58666e !important;
+    border-color: #dee5e7;
+    background-color: #fcfdfd;
+    border-bottom-color: #d8e1e3;
+    box-shadow: 0 1px 1px rgba(90, 90, 90, 0.1);
+    &:hover, &:active {
+      color: #58666e;
+      border-color: #c7d3d6;
+      background-color: #edf1f2;
+    }
+  }
+
+  &.table-bordered {
+    border: 1px solid #eaeff0;
+
+    th, td {
+      border: 1px solid #eaeff0;
+    }
+
+    thead {
+      th, td {
+        border-bottom-width: 2px;
+      }
+    }
+  }
+}
+
 /*  pagenation start*/
 .pagination {
   display: inline-block;
