@@ -32,7 +32,7 @@ angular.module('ui.xg.table', ['ui.xg.pager'])
                 syncAllRowMap();
                 syncSelectedRow();
                 syncAllRowSelected();
-                $timeout(this.syncFixTableTrHeight.bind(this));
+                $scope.$evalAsync(this.syncFixTableTrHeight.bind(this));
             });
 
             $scope.$watch('selectedRowMap', syncSelectedRow);
